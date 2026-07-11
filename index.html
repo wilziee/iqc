@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xaerisoft IQC Generator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <style>
+        :root {
+            --neon-cyan: #00f0ff;
+            --neon-purple: #b026ff;
+            --glass-bg: rgba(20, 20, 25, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            --text-light: #f4f4f5;
+            --text-muted: #a1a1aa;
+            --danger: #ff453a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background-color: #050505;
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Aurora Background Elements */
+        .aurora-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            overflow: hidden;
+            background: #050505;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.5;
+            animation: float 10s infinite alternate ease-in-out;
+        }
+
+        .orb-1 {
+            width: 400px;
+            height: 400px;
+            background: var(--neon-cyan);
+            top: -100px;
+            left: -100px;
+        }
+
+        .orb-2 {
+            width: 500px;
+            height: 500px;
+            background: var(--neon-purple);
+            bottom: -150px;
+            right: -100px;
+            animation-delay: -5s;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(50px, 50px) scale(1.1); }
+        }
+
+        /* Layout */
+        .header {
+            text-align: center;
+            padding: 2rem 1rem;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.02), transparent);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .main-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            width: 100%;
+        }
+
+        @media (min-width: 900px) {
+            .main-container {
+                grid-template-columns: 350px 1fr;
+            }
+        }
+
+        /* Glassmorphism Panels */
+        .panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 1.5rem;
+            box-shadow: var(--glass-shadow);
+        }
+
+        /* Controls */
+        .control-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .control-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        input[type="text"], select {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--glass-border);
+            color: var(--text-light);
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        select option {
+            background: #1a1a24;
+            color: #fff;
+        }
+
+        input[type="text"]:focus, select:focus {
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            accent-color: var(--neon-cyan);
+            cursor: pointer;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 0.8rem;
+            border-radius: 12px;
+            border: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--neon-cyan), #0077ff);
+            color: #000;
+            box-shadow: 0 4px 15px rgba(0, 240, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 240, 255, 0.5);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-light);
+            border: 1px solid var(--glass-border);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        /* Preview Area */
+        .preview-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.2);
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            min-height: 600px;
+        }
+
+        #capture-area {
+            position: relative;
+            width: 100%;
+            max-width: 450px;
+            aspect-ratio: 9/19.5;
+            background-color: #111b21;
+            background-image: url('mentahan1.jpg'); /* Default Opsi 1 */
+            background-size: cover;
+            background-position: center;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            transition: background-image 0.3s ease;
+        }
+
+        /* iOS Style Status Bar */
+        #status-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #ffffff;
+            font-size: 0.85rem;
+            font-weight: 600;
+            z-index: 20;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+        }
+
+        .sb-right {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .sb-icon {
+            height: 12px;
+            fill: currentColor;
+        }
+
+        .sb-icon-stroke {
+            height: 12px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 1.5;
+        }
+
+        /* Update agar chat rata kanan default */
+        #chat-group {
+            position: absolute;
+            top: 50%;
+            right: 20px; /* Posisi ke kanan */
+            left: auto;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end; /* Chat rata kanan */
+            width: 100%;
+            padding: 0 1.5rem;
+            z-index: 10;
+        }
+
+        /* Update Reaction Box: Ikon + di sebelah kiri */
+        #reaction-box {
+            background: #1c1c1e;
+            border-radius: 30px;
+            padding: 6px 14px 6px 12px; /* Padding disesuaikan */
+            display: flex;
+            flex-direction: row-reverse; /* Membalik urutan flex */
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            margin-bottom: 8px;
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            width: fit-content;
+        }
+
+        #reaction-text {
+            font-size: 1.3rem;
+            letter-spacing: 2px;
+        }
+
+        /* Ikon + sekarang di kiri */
+        .react-plus {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 26px;
+            height: 26px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            color: #a1a1aa;
+            margin-right: 0; 
+        }
+
+        /* Bubble Chat */
+        #bubble {
+            background: #005c4b; /* Default Gelembung Opsi 1 */
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 16px 16px 4px 16px; /* Sisi yang tajam disesuaikan ke kanan */
+            max-width: 85%;
+            width: fit-content;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .bubble-content {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            gap: 8px;
+        }
+
+        #chat-text {
+            font-size: 1rem;
+            line-height: 1.4;
+            word-wrap: break-word;
+            word-break: break-word;
+            padding-bottom: 4px;
+        }
+
+        #chat-time {
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.6);
+            margin-left: auto;
+            margin-bottom: -2px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .checkmarks {
+            width: 16px;
+            height: 16px;
+            fill: #53bdeb;
+        }
+
+        /* Context Menu Bawah Teks (Dark Mode) */
+        #context-menu {
+            margin-top: 8px;
+            background: rgba(30, 30, 30, 0.95);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: 14px;
+            width: 230px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 13px 16px;
+            font-size: 0.95rem;
+            color: #e5e5ea;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .menu-item:last-child {
+            border-bottom: none;
+        }
+
+        .menu-item.danger {
+            color: var(--danger);
+        }
+
+        .menu-item svg {
+            width: 20px;
+            height: 20px;
+            stroke: currentColor;
+            stroke-width: 1.5;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            opacity: 0.9;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes fadeIn {
+            0% { transform: translateY(-10px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="aurora-bg">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+    </div>
+
+    <header class="header">
+        <h1>Xaerisoft Iqc Generator</h1>
+        <p>Quick Message Iphone</p>
+    </header>
+
+    <main class="main-container">
+        <aside class="panel">
+            
+            <!-- PENGATURAN TEMA / MENTAHAN -->
+            <div class="control-group" style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; margin-bottom: 15px;">
+                <label style="color: var(--neon-cyan);">— Pilih Mentahan —</label>
+                <select id="select-theme" style="margin-top: 10px;">
+                    <option value="1">Opsi 1 </option>
+                    <option value="2">Opsi 2</option>
+                </select>
+            </div>
+
+            <!-- PENGATURAN STATUS BAR -->
+            <div class="control-group" style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; margin-bottom: 15px;">
+                <label style="color: var(--neon-purple);">— Setting Status Bar —</label>
+                
+                <label style="margin-top: 10px;">Jam Status Bar</label>
+                <input type="text" id="input-sb-time" value="" placeholder="Contoh: 1:17 PM">
+                
+                <label style="margin-top: 10px;">Nama SIM / Provider</label>
+                <input type="text" id="input-sb-sim" value="" placeholder="Contoh: Telkomsel">
+                
+                <label style="margin-top: 10px;">Baterai (%)</label>
+                <input type="text" id="input-sb-batt" value="" placeholder="Contoh: 100">
+            </div>
+
+            <!-- PENGATURAN CHAT -->
+            <div class="control-group">
+                <label style="color: var(--neon-cyan);">— Setting Chat —</label>
+                <label style="margin-top: 10px;">Isi Chat</label>
+                <input type="text" id="input-text" value="" placeholder="Ketik isi chat...">
+            </div>
+
+            <div class="control-group">
+                <label>Waktu Chat (Dalam Bubble)</label>
+                <input type="text" id="input-time" value="" placeholder="Contoh: 1.17 PM">
+            </div>
+
+            <div class="control-group">
+                <label>Emoji Reaction</label>
+                <input type="text" id="input-emoji" value="" placeholder="Contoh: 👍❤️😂">
+            </div>
+
+            <div class="control-group">
+                <label>Posisi Horizontal (X)</label>
+                <div class="slider-container">
+                    <input type="range" id="pos-x" min="0" max="100" value="20">
+                    <span id="val-x">20%</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>Posisi Vertikal (Y)</label>
+                <div class="slider-container">
+                    <input type="range" id="pos-y" min="0" max="100" value="50">
+                    <span id="val-y">50%</span>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-secondary" id="btn-reset">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                    Reset
+                </button>
+                <button class="btn btn-primary" id="btn-download">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Download PNG
+                </button>
+            </div>
+        </aside>
+
+        <section class="panel preview-container">
+            <div id="capture-area">
+                
+                <!-- STATUS BAR -->
+                <div id="status-bar">
+                    <div id="sb-time-display">1:17 PM</div>
+                    <div class="sb-right">
+                        <span id="sb-sim-display" style="margin-right: 4px;"></span>
+                        
+                        <!-- Signal Icon -->
+                        <svg class="sb-icon" viewBox="0 0 16 12">
+                            <rect x="0" y="8" width="3" height="4" rx="1"/>
+                            <rect x="4" y="6" width="3" height="6" rx="1"/>
+                            <rect x="8" y="3" width="3" height="9" rx="1"/>
+                            <rect x="12" y="0" width="3" height="12" rx="1"/>
+                        </svg>
+                        
+                        <!-- WiFi Icon -->
+                        <svg class="sb-icon-stroke" viewBox="0 0 18 14" style="stroke-linecap: round; stroke-linejoin: round;">
+                            <path d="M1 4.5a15 15 0 0116 0" />
+                            <path d="M4 7.5a10 10 0 0110 0" />
+                            <path d="M7 10.5a5 5 0 014 0" />
+                            <circle cx="9" cy="13" r="1" fill="currentColor" stroke="none"/>
+                        </svg>
+
+                        <!-- Battery % and Icon -->
+                        <span id="sb-batt-display" style="margin-left: 2px;">100%</span>
+                        <svg class="sb-icon-stroke" viewBox="0 0 20 10" style="margin-left: -2px;">
+                            <rect x="1" y="1" width="15" height="8" rx="2" />
+                            <path d="M18 4v2" />
+                            <rect x="2" y="2" width="13" height="6" rx="1" fill="currentColor" stroke="none" id="battery-fill"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <div id="chat-group">
+                    <!-- REACTION BOX UPDATE -->
+                    <div id="reaction-box">
+                        <span id="reaction-text">isi emoji</span>
+                        <div class="react-plus">
+                            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                        </div>
+                    </div>
+                    
+                    <div id="bubble">
+                        <div class="bubble-content">
+                            <span id="chat-text">isi teks</span>
+                            <span id="chat-time">
+                                1.17 PM
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- CONTEXT MENU UPDATE DARK MODE -->
+                    <div id="context-menu">
+                        <div class="menu-item">
+                            <span>Balas</span>
+                            <svg viewBox="0 0 24 24"><polyline points="9 17 4 12 9 7"></polyline><path d="M20 18v-2a4 4 0 0 0-4-4H4"></path></svg>
+                        </div>
+                        <div class="menu-item">
+                            <span>Teruskan</span>
+                            <svg viewBox="0 0 24 24"><polyline points="15 17 20 12 15 7"></polyline><path d="M4 18v-2a4 4 0 0 1 4-4h12"></path></svg>
+                        </div>
+                        <div class="menu-item">
+                            <span>Salin</span>
+                            <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        </div>
+                        <div class="menu-item">
+                            <span>Beri Bintang</span>
+                            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                        </div>
+                        <div class="menu-item">
+                            <span>Sematkan</span>
+                            <svg viewBox="0 0 24 24"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.6V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3v4.6a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"></path></svg>
+                        </div>
+                        <div class="menu-item">
+                            <span>Laporkan</span>
+                            <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                        </div>
+                        <div class="menu-item danger">
+                            <span>Hapus</span>
+                            <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const captureArea = document.getElementById('capture-area');
+            
+            // Theme Selector
+            const selectTheme = document.getElementById('select-theme');
+            const bubble = document.getElementById('bubble');
+            const chatText = document.getElementById('chat-text');
+            const chatTime = document.getElementById('chat-time');
+
+            // Status Bar Elements
+            const inputSbTime = document.getElementById('input-sb-time');
+            const inputSbSim = document.getElementById('input-sb-sim');
+            const inputSbBatt = document.getElementById('input-sb-batt');
+            const sbTimeDisplay = document.getElementById('sb-time-display');
+            const sbSimDisplay = document.getElementById('sb-sim-display');
+            const sbBattDisplay = document.getElementById('sb-batt-display');
+            const batteryFill = document.getElementById('battery-fill');
+
+            // Chat Elements
+            const inputText = document.getElementById('input-text');
+            const inputTime = document.getElementById('input-time');
+            const inputEmoji = document.getElementById('input-emoji');
+            
+            // Positions & Containers
+            const posX = document.getElementById('pos-x');
+            const posY = document.getElementById('pos-y');
+            const valX = document.getElementById('val-x');
+            const valY = document.getElementById('val-y');
+            const chatGroup = document.getElementById('chat-group');
+            const reactionBox = document.getElementById('reaction-box');
+            const reactionText = document.getElementById('reaction-text');
+            
+            // Buttons
+            const btnReset = document.getElementById('btn-reset');
+            const btnDownload = document.getElementById('btn-download');
+
+            // --- Event Listener Pilihan Mentahan & Pengaturan Alignment ---
+            selectTheme.addEventListener('change', (e) => {
+                if (e.target.value === "1") {
+                    captureArea.style.backgroundImage = "url('mentahan1.jpg')";
+                    bubble.style.backgroundColor = "#005c4b";
+                    chatText.style.color = "#ffffff";
+                    chatTime.style.color = "rgba(255,255,255,0.7)";
+                    
+                    // Logika Opsi 1: Rata Kanan (Pengirim)
+                    chatGroup.style.alignItems = "flex-end";
+                    reactionBox.style.flexDirection = "row-reverse";
+                    reactionBox.style.padding = "6px 14px 6px 12px";
+                    bubble.style.borderRadius = "16px 16px 4px 16px";
+                } else {
+                    captureArea.style.backgroundImage = "url('mentahan2.jpg')";
+                    bubble.style.backgroundColor = "#1F2024"; /* Gelembung Hitam Dark Mode */
+                    chatText.style.color = "#ffffff";
+                    chatTime.style.color = "rgba(255,255,255,0.6)";
+                    
+                    // Logika Opsi 2: Rata Kiri (Penerima)
+                    chatGroup.style.alignItems = "flex-start";
+                    reactionBox.style.flexDirection = "row";
+                    reactionBox.style.padding = "6px 12px 6px 14px";
+                    bubble.style.borderRadius = "16px 16px 16px 4px";
+                }
+                updatePosition(); // Memperbarui slider posisi agar tidak berantakan
+            });
+
+            // --- Event Listeners Status Bar ---
+            inputSbTime.addEventListener('input', (e) => {
+                sbTimeDisplay.textContent = e.target.value || '1:17 PM';
+            });
+
+            inputSbSim.addEventListener('input', (e) => {
+                sbSimDisplay.textContent = e.target.value || '';
+            });
+
+            inputSbBatt.addEventListener('input', (e) => {
+                let val = parseInt(e.target.value) || 0;
+                if(val > 100) val = 100;
+                if(val < 0) val = 0;
+                sbBattDisplay.textContent = val + '%';
+                
+                const width = (val / 100) * 13;
+                batteryFill.setAttribute('width', width);
+                
+                if(val <= 20) {
+                    batteryFill.setAttribute('fill', '#ff3b30');
+                } else {
+                    batteryFill.setAttribute('fill', 'currentColor');
+                }
+            });
+
+            // --- Event Listeners Chat ---
+            inputText.addEventListener('input', (e) => {
+                chatText.textContent = e.target.value || ' ';
+            });
+
+            inputTime.addEventListener('input', (e) => {
+                const timeValue = e.target.value || '1.17 PM';
+                chatTime.innerHTML = `${timeValue}`;
+            });
+
+            inputEmoji.addEventListener('input', (e) => {
+                const val = e.target.value;
+                reactionText.textContent = val;
+                reactionBox.style.display = val ? 'flex' : 'none';
+            });
+
+            const updatePosition = () => {
+                const x = posX.value;
+                const y = posY.value;
+                valX.textContent = `${x}%`;
+                valY.textContent = `${y}%`;
+                
+                chatGroup.style.top = `${y}%`;
+                
+                // Menyesuaikan orientasi geser (X) berdasarkan tema
+                if (selectTheme.value === "1") {
+                    chatGroup.style.right = `${x}%`;
+                    chatGroup.style.left = 'auto';
+                } else {
+                    chatGroup.style.left = `${x}%`;
+                    chatGroup.style.right = 'auto';
+                }
+            };
+
+            posX.addEventListener('input', updatePosition);
+            posY.addEventListener('input', updatePosition);
+
+            // --- Reset Button ---
+            btnReset.addEventListener('click', () => {
+                inputSbTime.value = '1:17 PM';
+                inputSbSim.value = '';
+                inputSbBatt.value = '100';
+                inputText.value = 'isi';
+                inputTime.value = '1.17 PM';
+                inputEmoji.value = '👍❤️😂😮😢🙏🤣';
+                posX.value = 20;
+                posY.value = 50;
+                selectTheme.value = "2";
+                
+                inputSbTime.dispatchEvent(new Event('input'));
+                inputSbSim.dispatchEvent(new Event('input'));
+                inputSbBatt.dispatchEvent(new Event('input'));
+                inputText.dispatchEvent(new Event('input'));
+                inputTime.dispatchEvent(new Event('input'));
+                inputEmoji.dispatchEvent(new Event('input'));
+                selectTheme.dispatchEvent(new Event('change'));
+                updatePosition();
+            });
+
+            // --- Set posisi awal saat load (Default opsi 2 dari gambar) ---
+            selectTheme.value = "2";
+            selectTheme.dispatchEvent(new Event('change'));
+            posX.value = 10;
+            posY.value = 45;
+            updatePosition();
+
+            // --- Download Button ---
+            btnDownload.addEventListener('click', () => {
+                btnDownload.innerHTML = 'Memproses...';
+                html2canvas(captureArea, {
+                    scale: 3,
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: '#111b21'
+                }).then(canvas => {
+                    const link = document.createElement('a');
+                    link.download = `Xaerisoft_Chat_${new Date().getTime()}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                    btnDownload.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download PNG`;
+                }).catch(err => {
+                    console.error("Gagal membuat gambar:", err);
+                    alert("Terjadi kesalahan.");
+                    btnDownload.innerHTML = `Coba Lagi`;
+                });
+            });
+        });
+    </script>
+</body>
+</html>
