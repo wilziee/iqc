@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✨ Xaerisoft Chat Mockup Generator</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+    <div class="bg-orb orb-1"></div>
+    <div class="bg-orb orb-2"></div>
+
+    <div class="container">
+        <header class="glass-header">
+            <h1>✨ Generator <spa> IQC</spa></h1>
+            <p>membuat qiuck message iphone</p>
+        </header>
+
+        <main class="workspace">
+            <section class="controls glass-panel">
+                <h2 class="section-title">Konfigurasi</h2>
+                
+                <div class="input-group">
+                    <label>Nama Pengirim</label>
+                    <input type="text" id="inputName" value="Wilzi">
+                </div>
+
+                <div class="input-group">
+                    <label>Foto Profil (Upload)</label>
+                    <input type="file" id="inputAvatar" accept="image/*">
+                </div>
+
+                <div class="input-group">
+                    <label>Isi Pesan</label>
+                    <textarea id="inputMessage" rows="3">isi teks</textarea>
+                </div>
+
+                <div class="row">
+                    <div class="input-group half">
+                        <label>Waktu Chat</label>
+                        <input type="time" id="inputTime" value="10:00">
+                    </div>
+                    <div class="input-group half">
+                        <label>Posisi Bubble</label>
+                        <select id="inputPosition">
+                            <option value="left">Kiri (Diterima)</option>
+                            <option value="right">Kanan (Dikirim)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="input-group half">
+                        <label>Tema Mockup</label>
+                        <select id="inputTheme">
+                            <option value="dark">Dark Mode</option>
+                            <option value="light">Light Mode</option>
+                        </select>
+                    </div>
+                    <div class="input-group half">
+                        <label>Status</label>
+                        <select id="inputStatus">
+                            <option value="read">Dibaca (Biru)</option>
+                            <option value="delivered">Terkirim</option>
+                            <option value="none">Sembunyikan</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="input-group half">
+                        <label>Emoji Reaction</label>
+                        <input type="text" id="inputEmoji" placeholder="Misal: ❤️(boleh lebih)" maxlength="2">
+                    </div>
+                    <div class="input-group half checkbox-group">
+                        <label class="switch">
+                            <input type="checkbox" id="inputTyping">
+                            <span class="slider"></span>
+                        </label>
+                        <span>Typing Indicator</span>
+                    </div>
+                </div>
+
+                <div class="export-actions">
+                    <button class="btn-gradient" id="btnExportPNG">Download PNG</button>
+                    <button class="btn-outline" id="btnExportJPG">Download JPEG</button>
+                </div>
+            </section>
+
+            <section class="preview">
+                <div class="phone-frame" id="phoneMockup">
+                    <div class="notch"></div>
+                    
+                    <div class="chat-screen dark" id="chatScreen">
+                        <div class="chat-header">
+                            <div class="back-btn">‹</div>
+                            <img src="https://ui-avatars.com/api/?name=Wilzi&background=b14bf4&color=fff" id="previewHeaderAvatar" class="avatar">
+                            <div class="header-info">
+                                <h3 id="previewHeaderName">Wilzi</h3>
+                                <p>Online</p>
+                            </div>
+                        </div>
+
+                        <div class="chat-body" id="chatBody">
+                            <div class="message-wrapper left" id="messageWrapper">
+                                <img src="https://ui-avatars.com/api/?name=Wilzi&background=b14bf4&color=fff" id="previewAvatar" class="avatar-msg">
+                                <div class="message-content">
+                                    <div class="bubble" id="chatBubble">
+                                        <div class="typing-indicator" id="typingIndicator" style="display: none;">
+                                            <span></span><span></span><span></span>
+                                        </div>
+                                        <span id="previewMessage">teks</span>
+                                        
+                                        <div class="msg-meta">
+                                            <span id="previewTime">isi jam</span>
+                                            <svg id="previewStatus" class="status-icon read" viewBox="0 0 16 15" width="16" height="15" style="display: none;">
+                                                <path fill="currentColor" d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.879a.32.32 0 0 1-.484.033l-.358-.325a.319.319 0 0 0-.484.032l-.378.483a.418.418 0 0 0 .036.541l1.32 1.266c.143.14.361.125.484-.033l6.272-8.048a.366.366 0 0 0-.064-.512zm-4.1 0l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.879a.32.32 0 0 1-.484.033L1.891 7.769a.366.366 0 0 0-.515.006l-.423.433a.364.364 0 0 0 .006.514l3.258 3.185c.143.14.361.125.484-.033l6.272-8.048a.365.365 0 0 0-.063-.51z"></path>
+                                            </svg>
+                                        </div>
+                                        
+                                        <div class="reaction" id="previewReaction" style="display: none;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>Made by <strong>Wilz</strong> | Powered by <strong>Xaerisoft</strong></p>
+        </footer>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
