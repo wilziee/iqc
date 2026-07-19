@@ -1,5 +1,5 @@
 // ── UPLOADED URL STORE ──
-const uploadedUrls = { ttqc: null, iqcimg: null, musiccard: null, botak: null, chibi: null, figure: null, nft: null, mafia: null, hitam: null, mountain: null, mirror: null, playlist: null, figure2: null };
+const uploadedUrls = { ttqc: null, iqcimg: null, musiccard: null };
 
 // ── TABS ──
 function switchTab(id, btn) {
@@ -95,12 +95,6 @@ function generate(id) {
     if (!usn) return showToast('Isi username terlebih dahulu!');
     url = `https://apii.nexadev.my.id/fakeff?usn=${encode(usn)}`;
 
-  } else if (id === 'fakeffduo') {
-    const n1 = document.getElementById('ffduo-name1').value.trim();
-    const n2 = document.getElementById('ffduo-name2').value.trim();
-    if (!n1 || !n2) return showToast('Isi kedua nama!');
-    url = `http://api.nexadev.my.id/api/canvas/fakeffduo/?name1=${encode(n1)}&name2=${encode(n2)}`;
-
   } else if (id === 'nokia') {
     const text  = document.getElementById('nokia-text').value.trim();
     const from  = document.getElementById('nokia-from').value.trim();
@@ -109,8 +103,6 @@ function generate(id) {
     const title = document.getElementById('nokia-title').value.trim();
     if (!text) return showToast('Isi pesan Nokia!');
     url = `https://apii.nexadev.my.id/nokia?text=${encode(text)}&from=${encode(from)}&date=${encode(date)}&time=${encode(time)}&title=${encode(title)}`;
-
-  // BAGIAN IQC SUDAH DIHAPUS DARI SINI
 
   } else if (id === 'ttqc') {
     const imgUrl = uploadedUrls['ttqc'];
@@ -133,55 +125,6 @@ function generate(id) {
     if (!judul || !nama) return showToast('Isi judul dan nama artis!');
     url = `https://api.nexray.eu.cc/canvas/musiccard?judul=${encode(judul)}&nama=${encode(nama)}&image_url=${encode(imgUrl || '')}`;
 
-  } else if (id === 'botak') {
-    const imgUrl = uploadedUrls['botak'];
-    if (!imgUrl) return showToast('Upload foto terlebih dahulu!');
-    url = `https://api.nexray.eu.cc/ephoto/botak?url=${encode(imgUrl)}`;
-
-  } else if (id === 'chibi') {
-    const imgUrl = uploadedUrls['chibi'];
-    if (!imgUrl) return showToast('Upload foto terlebih dahulu!');
-    url = `https://api.nexray.eu.cc/ephoto/chibi?url=${encode(imgUrl)}`;
-
-  } else if (id === 'figure') {
-    const imgUrl = uploadedUrls['figure'];
-    if (!imgUrl) return showToast('Upload foto terlebih dahulu!');
-    url = `https://api.nexray.eu.cc/ephoto/v1/figure?url=${encode(imgUrl)}`;
-
-  } else if (id === 'nft') {
-    const imgUrl = uploadedUrls['nft'];
-    if (!imgUrl) return showToast('Upload foto terlebih dahulu!');
-    url = `https://api.nexray.eu.cc/ephoto/nft?url=${encode(imgUrl)}`;
-
-  } else if (id === 'mafia') {
-    const imgUrl = uploadedUrls['mafia'];
-    if (!imgUrl) return showToast('Upload foto terlebih dahulu!');
-    url = `https://api.nexray.eu.cc/ephoto/mafia?url=${encode(imgUrl)}`;
-
-  } else if (id === 'hitam') {
-    const imgUrl = uploadedUrls['hitam'];
-    if (!imgUrl) return showToast('Upload foto terlebih dahulu!');
-    url = `https://api.nexray.eu.cc/ephoto/hitam?url=${encode(imgUrl)}`;
-
-  } else if (id === 'mountain') {
-    const imgUrl = uploadedUrls['mountain'];
-    if (!imgUrl) return showToast('Upload foto terlebih dahulu!');
-    url = `https://api.nexray.eu.cc/ephoto/mountain?url=${encode(imgUrl)}`;
-
-  } else if (id === 'mirror') {
-    const imgUrl = uploadedUrls['mirror'];
-    if (!imgUrl) return showToast('Upload foto terlebih dahulu!');
-    url = `https://api.nexray.eu.cc/ephoto/mirror?url=${encode(imgUrl)}`;
-
-  } else if (id === 'playlist') {
-    const imgUrl = uploadedUrls['playlist'];
-    if (!imgUrl) return showToast('Upload foto terlebih dahulu!');
-    url = `https://api.nexray.eu.cc/ephoto/playlist?url=${encode(imgUrl)}`;
-
-  } else if (id === 'figure2') {
-    const imgUrl = uploadedUrls['figure2'];
-    if (!imgUrl) return showToast('Upload foto terlebih dahulu!');
-    url = `https://api.nexray.eu.cc/ephoto/v2/figure?url=${encode(imgUrl)}`;
   } else if (id === 'iqcdark') {
     const text = document.getElementById('iqcdark-text').value.trim();
     const time = document.getElementById('iqcdark-time').value.trim();
@@ -270,7 +213,8 @@ async function uploadFile(id, file) {
     const data = await res.json();
     if (data.success && data.files && data.files[0] && data.files[0].url) {
       uploadedUrls[id] = data.files[0].url;
-      previewUrl.textContent = data.files[0].url;
+      // Menyembunyikan link API yang terekspos dengan menampilkan pesan status saja
+      previewUrl.textContent = 'Upload Selesai ✔'; 
       showToast('Upload berhasil!');
     } else {
       throw new Error('Upload gagal');
