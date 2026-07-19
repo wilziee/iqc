@@ -1,5 +1,5 @@
 /**
- * XAERISOFT CHAT STUDIO ENGINE v3.5 (iOS Multi-Theme)
+ * XAERISOFT CHAT STUDIO ENGINE v4.0 (Ultra-Realistic iOS Multi-Theme)
  * UI/UX: Futuristik & Premium
  * Platform: Dual Render Engine (TikTok & WhatsApp iOS)
  */
@@ -209,14 +209,12 @@ async function generate() {
         ctx.imageSmoothingEnabled = true;
         ctx.imageSmoothingQuality = 'high';
 
-        // CABANG LOGIKA: TIKTOK vs WHATSAPP
         if (platform === 'tiktok') {
             await renderTikTok(ctx, chatText);
         } else {
             await renderWhatsApp(ctx, chatText, theme);
         }
 
-        // Output ke Layar
         currentDataUrl = canvas.toDataURL('image/png');
         DOM.canvas.src = currentDataUrl;
         
@@ -256,15 +254,12 @@ async function renderTikTok(ctx, chatText) {
         templateImageCache = await loadImg(TEMPLATE_URL);
     }
 
-    if(DOM.loadingSub) DOM.loadingSub.textContent = 'Memuat avatar...';
     let avatarImage;
     if (avatarDataUrl) {
         avatarImage = await loadImg(avatarDataUrl);
     } else {
         avatarImage = await loadImg('https://cdn.jsdelivr.net/gh/Ditzzx-vibecoder/Assets@6b71d84a580f385bd7ee36402df5341ead4770a0/Image/artworks-gWLRE6HyPH3DgVMG-ZFFxtg-t500x500.jpg');
     }
-
-    if(DOM.loadingSub) DOM.loadingSub.textContent = 'Rendering TikTok...';
 
     ctx.clearRect(0, 0, 1080, 2280);
     ctx.drawImage(templateImageCache, 0, 0, 1080, 2280);
@@ -319,7 +314,7 @@ async function renderTikTok(ctx, chatText) {
 }
 
 // =============================================
-// ENGINE: RENDER WHATSAPP DENGAN TEMA (UPDATED)
+// ENGINE: RENDER WHATSAPP (ULTRA REALISTIC)
 // =============================================
 async function renderWhatsApp(ctx, chatText, theme) {
     if(DOM.loadingSub) DOM.loadingSub.textContent = 'Membangun Lingkungan iOS WA...';
@@ -327,84 +322,96 @@ async function renderWhatsApp(ctx, chatText, theme) {
     const iosFont = `-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif`;
     const emojiFont = `"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif`;
 
-    // Palet Warna Default
-    let bg, menuBg, bubbleBg, textCol, separatorCol, timeCol, tickCol, plusBg, plusIcon, blurBgIn, blurBgOut, shadowCol;
+    let bg, menuBg, bubbleBg, textCol, separatorCol, timeCol, tickCol, plusBg, plusIcon, blurBgIn, blurBgOut, shadowCol, focusDim;
 
-    // SISTEM TEMA DINAMIS (KALIBRASI PERSIS GAMBAR)
+    // KALIBRASI WARNA 99% MATCH DENGAN GAMBAR REFERENSI
     if (theme === 'dark') {
-        bg = '#010101'; // Hitam pekat iOS
-        menuBg = '#1F1F1F'; // Abu-abu gelap untuk menu
-        bubbleBg = '#005C4B'; // Hijau khas WA Dark Mode
+        bg = '#0B141A'; // Latar belakang hitam keabuan khas WA
+        menuBg = '#1E1E1E'; // Menu pop-up gelap
+        bubbleBg = '#005C4B'; // Hijau tua sent bubble
         textCol = '#FFFFFF';
         separatorCol = '#38383A';
-        timeCol = '#8696A0';
-        tickCol = '#53BDEB';
+        timeCol = '#8696A0'; // Abu-abu waktu
+        tickCol = '#53BDEB'; // Centang biru terang
         plusBg = '#3A3A3C';
         plusIcon = '#A1A1A6';
-        blurBgIn = '#1C1C1E'; // Bubble received (blur)
-        blurBgOut = '#005C4B'; // Bubble sent (blur)
-        shadowCol = 'rgba(0,0,0,0.6)'; // Shadow lebih tebal untuk dark mode
+        blurBgIn = '#202C33'; // Received message blur
+        blurBgOut = '#005C4B'; // Sent message blur
+        shadowCol = 'rgba(0,0,0,0.7)';
+        focusDim = 'rgba(0,0,0,0.4)'; // Efek gelap saat menu terbuka
     } else if (theme === 'light') {
-        bg = '#F2F2F6'; // Abu-abu terang background iOS
-        menuBg = '#FFFFFF';
-        bubbleBg = '#E0F6CA'; // Hijau terang WA Light
+        bg = '#EFE7E0'; // Background terang WA (creamy grey)
+        menuBg = '#F9F9F9'; // Menu putih terang
+        bubbleBg = '#D9FDD3'; // Hijau pastel khas WA Light
         textCol = '#000000';
         separatorCol = '#E5E5EA';
-        timeCol = '#667781';
-        tickCol = '#53BDEB';
+        timeCol = '#667781'; // Abu-abu gelap waktu
+        tickCol = '#53BDEB'; // Centang biru
         plusBg = '#E5E5EA';
         plusIcon = '#8E8E93';
-        blurBgIn = '#FFFFFF';
-        blurBgOut = '#E0F6CA';
-        shadowCol = 'rgba(0,0,0,0.12)'; // Shadow lembut
+        blurBgIn = '#FFFFFF'; // Received blur
+        blurBgOut = '#D9FDD3'; // Sent blur
+        shadowCol = 'rgba(0,0,0,0.12)';
+        focusDim = 'rgba(255,255,255,0.4)'; // Efek terang fokus
     } else if (theme === 'pink') {
-        bg = '#F2ECEB'; // Krem ke-pink-an lembut (seperti gambar)
-        menuBg = '#FFFFFF';
-        bubbleBg = '#FFC4D0'; // Merah muda bubble
+        bg = '#F4EAEB'; // Background abu kemerahan pucat
+        menuBg = '#F9F9F9'; 
+        bubbleBg = '#FFB4C2'; // Warna merah muda pastel sesuai gambar
         textCol = '#000000';
         separatorCol = '#E5E5EA';
-        timeCol = '#8A6A71'; // Warna waktu abu-abu kemerahan
-        tickCol = '#E5395E'; // Centang warna merah muda tegas
+        timeCol = '#8A6A71'; // Warna waktu merah tua pudar
+        tickCol = '#E5395E'; // Centang merah muda tegas
         plusBg = '#E5E5EA';
         plusIcon = '#8E8E93';
-        blurBgIn = '#FFFFFF';
-        blurBgOut = '#FFC4D0';
-        shadowCol = 'rgba(0,0,0,0.12)'; // Shadow lembut
+        blurBgIn = '#FFFFFF'; 
+        blurBgOut = '#FFB4C2'; 
+        shadowCol = 'rgba(0,0,0,0.12)';
+        focusDim = 'rgba(255,255,255,0.3)';
     }
     
-    // Draw Background Layer
+    // 1. Gambar Base Background
     ctx.clearRect(0, 0, 1080, 2280);
     ctx.fillStyle = bg;
     ctx.fillRect(0, 0, 1080, 2280);
     
-    // Efek Fake Chat Blur (Disesuaikan posisinya agar mirip history chat)
-    ctx.filter = 'blur(16px)';
-    drawRoundedRect(ctx, 400, 350, 600, 160, 35, blurBgOut); 
-    drawRoundedRect(ctx, 100, 550, 500, 140, 35, blurBgIn);  
-    drawRoundedRect(ctx, 350, 750, 650, 200, 35, blurBgOut); 
-    drawRoundedRect(ctx, 100, 1000, 750, 160, 35, blurBgIn); 
+    // 2. Gambar Riwayat Chat yang Di-Blur (Simulasi History)
+    ctx.filter = 'blur(18px)';
+    // Area Kanan Atas (Sent)
+    drawRoundedRect(ctx, 400, 200, 600, 180, 35, blurBgOut); 
+    // Area Kiri Tengah (Received - Avatar area placeholder)
+    ctx.fillStyle = '#FF5C5C'; // Dummy red avatar color
+    ctx.beginPath(); ctx.arc(130, 520, 45, 0, Math.PI*2); ctx.fill();
+    drawRoundedRect(ctx, 200, 450, 450, 150, 35, blurBgIn);  
+    // Area Kiri Bawah (Received panjang)
+    drawRoundedRect(ctx, 200, 650, 750, 250, 35, blurBgIn); 
+    // Area Kanan Bawah sebelum target (Sent)
+    drawRoundedRect(ctx, 350, 950, 650, 200, 35, blurBgOut); 
     ctx.filter = 'none';
 
-    // Kalkulasi Text Bubble 
+    // 3. Efek Dimming Overlay (Fokus hanya pada pesan yang dipilih)
+    ctx.fillStyle = focusDim;
+    ctx.fillRect(0, 0, 1080, 2280);
+
+    // Kalkulasi Dimensi Bubble Target
     ctx.font = `400 34px ${iosFont}`;
     const lines = wrapText(ctx, chatText, 600);
     const lineH = 48;
     let maxW = 50;
     for(let l of lines) maxW = Math.max(maxW, ctx.measureText(l).width);
     
-    // Padding dan dimensi bubble
     const bubbleW = maxW + 160; 
     const bubbleH = lines.length * lineH + 50;
     const bubbleX = 1000 - bubbleW; 
     const bubbleY = 1250; 
     
-    // Draw Bubble Chat (iOS Sudut Bawah Kanan)
+    // 4. Draw Bubble Chat Aktif (Pesan yang ditahan)
     ctx.fillStyle = bubbleBg;
     ctx.beginPath();
     const r = 35;
     ctx.moveTo(bubbleX + r, bubbleY);
     ctx.lineTo(bubbleX + bubbleW - r, bubbleY);
     ctx.quadraticCurveTo(bubbleX + bubbleW, bubbleY, bubbleX + bubbleW, bubbleY + r);
+    // Ekor chat kanan bawah
     ctx.lineTo(bubbleX + bubbleW, bubbleY + bubbleH - 6); 
     ctx.quadraticCurveTo(bubbleX + bubbleW, bubbleY + bubbleH, bubbleX + bubbleW - 6, bubbleY + bubbleH);
     ctx.lineTo(bubbleX + r, bubbleY + bubbleH);
@@ -414,7 +421,7 @@ async function renderWhatsApp(ctx, chatText, theme) {
     ctx.closePath();
     ctx.fill();
     
-    // Draw Text Message
+    // Teks Pesan
     ctx.fillStyle = textCol;
     ctx.textAlign = 'left';
     ctx.textBaseline = 'top';
@@ -423,25 +430,25 @@ async function renderWhatsApp(ctx, chatText, theme) {
         ctx.fillText(line, bubbleX + 30, bubbleY + 22 + (i * lineH));
     });
     
-    // Draw Timestamp
+    // Waktu (Timestamp)
     ctx.font = `500 22px ${iosFont}`;
     ctx.fillStyle = timeCol;
     ctx.textAlign = 'right';
     const timeY = bubbleY + bubbleH - 32;
     ctx.fillText('22.39', bubbleX + bubbleW - 75, timeY + 2);
     
-    // Draw Tick (Centang Biru / Merah)
+    // Centang
     ctx.fillStyle = tickCol;
     ctx.font = `900 24px 'Font Awesome 6 Free'`;
     ctx.fillText('\uf560', bubbleX + bubbleW - 25, timeY);
 
     // =============================================
-    // DRAW REACTION PILL (Gaya iOS Kompak)
+    // 5. DRAW REACTION PILL (Gaya iOS Kompak)
     // =============================================
     const pillW = 550; 
     const pillH = 96;
     const pillX = bubbleX + bubbleW - pillW; 
-    const pillY = bubbleY - pillH - 15;
+    const pillY = bubbleY - pillH - 20;
     
     ctx.shadowColor = shadowCol;
     ctx.shadowBlur = 45;
@@ -461,7 +468,7 @@ async function renderWhatsApp(ctx, chatText, theme) {
         ctx.fillText(em, startX + (i * spacing), pillY + pillH/2 + 4);
     });
     
-    // Tombol Plus (+) Apple Style
+    // Tombol Plus (+)
     const plusBtnX = startX + (6 * spacing) - 10;
     ctx.fillStyle = plusBg; 
     ctx.beginPath();
@@ -473,7 +480,7 @@ async function renderWhatsApp(ctx, chatText, theme) {
     ctx.fillText('+', plusBtnX, pillY + pillH/2 + 2);
 
     // =============================================
-    // DRAW CONTEXT MENU
+    // 6. DRAW CONTEXT MENU
     // =============================================
     const waMenu = [
         { unicode: '\uf3e5', text: 'Balas',           color: textCol },
@@ -510,7 +517,6 @@ async function renderWhatsApp(ctx, chatText, theme) {
         ctx.textAlign = 'right';
         ctx.fillText(item.unicode, menuX + menuW - 35, itemY + itemH/2);
         
-        // Garis Separator (Persis batas teks sampai ujung kanan)
         if (i < waMenu.length - 1) {
             ctx.fillStyle = separatorCol;
             ctx.fillRect(menuX + 35, itemY + itemH, menuW - 35, 1.5);
@@ -537,7 +543,6 @@ DOM.generateBtn.addEventListener('click', generate);
 DOM.downloadBtn.addEventListener('click', () => {
     if (!currentDataUrl) { showError('Tidak ada gambar'); return; }
     
-      // Format nama file dinamis sesuai pilihan
     let fileName = `XAERISOFT-${DOM.platformSelect.value.toUpperCase()}`;
     if (DOM.platformSelect.value === 'whatsapp') {
         fileName += `-${DOM.themeSelect.value.toUpperCase()}`;
