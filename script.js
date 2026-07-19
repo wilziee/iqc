@@ -1,568 +1,283 @@
-/**
- * XAERISOFT CHAT STUDIO ENGINE v4.0 (Ultra-Realistic iOS Multi-Theme)
- * UI/UX: Futuristik & Premium
- * Platform: Dual Render Engine (TikTok & WhatsApp iOS)
- */
+// ── UPLOADED URL STORE ──
+const uploadedUrls = { ttqc: null, iqcimg: null, musiccard: null, botak: null, chibi: null, figure: null, nft: null, mafia: null, hitam: null, mountain: null, mirror: null, playlist: null, figure2: null };
 
-// =============================================
-// CONFIG & ASSETS 
-// =============================================
-const TEMPLATE_URL = 'https://cdn.jsdelivr.net/gh/Ditzzx-vibecoder/Assets@main/ttqc/qyzwa.png';
-
-const FONT_ASSETS = [
-  { name: 'PlusJakartaSans-Regular', url: 'https://cdn.jsdelivr.net/gh/Ditzzx-vibecoder/Assets@main/ttqc/PlusJakartaSans-Regular.ttf', family: 'Plus Jakarta Sans' },
-  { name: 'PlusJakartaSans-Medium',  url: 'https://cdn.jsdelivr.net/gh/Ditzzx-vibecoder/Assets@main/ttqc/PlusJakartaSans-Medium.ttf',  family: 'Plus Jakarta Sans' },
-  { name: 'PlusJakartaSans-Bold',    url: 'https://cdn.jsdelivr.net/gh/Ditzzx-vibecoder/Assets@main/ttqc/PlusJakartaSans-Bold.ttf',    family: 'Plus Jakarta Sans' },
-  { name: 'FontAwesome-Solid',       url: 'https://cdn.jsdelivr.net/gh/Ditzzx-vibecoder/Assets@main/ttqc/fa-solid-900.ttf',            family: 'Font Awesome 6 Free' },
-];
-
-// Konfigurasi TikTok
-const TIKTOK_MENU = [
-  { unicode: '\uf3e5', text: 'Balas',           color: '#000000' },
-  { unicode: '\uf064', text: 'Teruskan',         color: '#000000' },
-  { unicode: '\uf0c5', text: 'Salin',            color: '#000000' },
-  { unicode: '\uf1ab', text: 'Terjemahkan',      color: '#000000' },
-  { unicode: '\uf2ed', text: 'Hapus untuk saya', color: '#000000' },
-  { unicode: '\uf024', text: 'Laporkan',         color: '#ea4335' },
-];
-
-const tkConfig = {
-  topPPX: 183, topPPY: 83, topPPRadius: 42,
-  topNameX: 250, topNameY: 82, topNameSize: 34,
-  chatPPX: 75, chatPPRadius: 38,
-  textX: 175, textY: 962,
-  bubbleWidth: 520, textSize: 30,
-  bubbleBgColor: '#ffffff', textColor: '#161823',
-};
-
-// =============================================
-// CACHE & DOM ELEMENTS
-// =============================================
-let templateImageCache = null;
-let fontsLoaded = false;
-let currentDataUrl = '';
-let avatarDataUrl = null;
-
-const DOM = {
-    platformSelect: document.getElementById('platformSelect'),
-    themeSelect: document.getElementById('themeSelect'),
-    themeWrapper: document.getElementById('themeWrapper'),
-    usernameWrapper: document.getElementById('usernameWrapper'),
-    avatarWrapper: document.getElementById('avatarWrapper'),
-    dropZone: document.getElementById('dropZone'),
-    avatarFile: document.getElementById('avatarFile'),
-    avatarThumb: document.getElementById('avatarThumb'),
-    username: document.getElementById('username'),
-    chatText: document.getElementById('chatText'),
-    generateBtn: document.getElementById('generateBtn'),
-    downloadBtn: document.getElementById('downloadBtn'),
-    newBtn: document.getElementById('newBtn'),
-    resultSection: document.getElementById('resultSection'),
-    canvas: document.getElementById('canvasPreview'),
-    errorMsg: document.getElementById('errorMessage'),
-    errorText: document.getElementById('errorText'),
-    loading: document.getElementById('loadingOverlay'),
-    loadingSub: document.getElementById('loadingSub'),
-    toast: document.getElementById('notification')
-};
-
-// =============================================
-// UI LISTENERS & LOGIC
-// =============================================
-DOM.platformSelect.addEventListener('change', (e) => {
-    if (e.target.value === 'whatsapp') {
-        DOM.avatarWrapper.style.display = 'none';
-        DOM.usernameWrapper.style.display = 'none';
-        DOM.themeWrapper.style.display = 'block'; 
-    } else {
-        DOM.avatarWrapper.style.display = 'block';
-        DOM.usernameWrapper.style.display = 'block';
-        DOM.themeWrapper.style.display = 'none'; 
-    }
-});
-
-DOM.dropZone.addEventListener('click', () => DOM.avatarFile.click());
-DOM.dropZone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    DOM.dropZone.classList.add('active');
-});
-DOM.dropZone.addEventListener('dragleave', () => DOM.dropZone.classList.remove('active'));
-DOM.dropZone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    DOM.dropZone.classList.remove('active');
-    const file = e.dataTransfer.files[0];
-    if (file && file.type.startsWith('image/')) loadAvatarFile(file);
-});
-DOM.avatarFile.addEventListener('change', (e) => {
-    if (e.target.files[0]) loadAvatarFile(e.target.files[0]);
-});
-
-function loadAvatarFile(file) {
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-        avatarDataUrl = ev.target.result;
-        DOM.avatarThumb.src = avatarDataUrl;
-        DOM.avatarThumb.classList.add('show');
-    };
-    reader.readAsDataURL(file);
+// ── TABS ──
+function switchTab(id, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  btn.classList.add('active');
 }
 
-// =============================================
-// HELPERS
-// =============================================
-function wrapText(ctx, text, maxWidth) {
-    const words = text.split(/(\s+)/);
-    const lines = [];
-    let currentLine = '';
-    for (const word of words) {
-        if (!word) continue;
-        if (word.trim() === '' && currentLine === '') continue;
-        const testLine = currentLine + word;
-        if (ctx.measureText(testLine).width > maxWidth) {
-            if (currentLine !== '') {
-                lines.push(currentLine.trimEnd());
-                currentLine = word.trimStart();
-            } else {
-                lines.push(testLine);
-                currentLine = '';
-            }
-        } else {
-            currentLine = testLine;
-        }
-    }
-    if (currentLine.trim()) lines.push(currentLine.trimEnd());
-    return lines;
+// ── TOAST ──
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
 }
 
-function drawRoundedRect(ctx, x, y, w, h, r, fill, stroke = null, shadow = false) {
-    ctx.save();
-    if (shadow) {
-        ctx.shadowColor = 'rgba(0,0,0,0.05)';
-        ctx.shadowBlur = 40;
-        ctx.shadowOffsetY = 12;
-    }
-    ctx.fillStyle = fill;
-    ctx.beginPath();
-    ctx.moveTo(x+r, y); ctx.lineTo(x+w-r, y); ctx.quadraticCurveTo(x+w, y, x+w, y+r);
-    ctx.lineTo(x+w, y+h-r); ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
-    ctx.lineTo(x+r, y+h); ctx.quadraticCurveTo(x, y+h, x, y+h-r);
-    ctx.lineTo(x, y+r); ctx.quadraticCurveTo(x, y, x+r, y);
-    ctx.closePath();
-    ctx.fill();
-    if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = 1; ctx.stroke(); }
-    ctx.restore();
+// ── RESULT RENDER ──
+function showResult(id, url) {
+  const box = document.getElementById('result-' + id);
+  box.innerHTML = `
+    <p class="result-label">— Hasil Generate</p>
+    <div class="result-img-wrap">
+      <img src="${url}" alt="Generated Image" onerror="imgError('${id}')"/>
+    </div>
+    <div class="result-actions">
+      <button class="btn-dl" onclick="downloadImg('${url}', '${id}')">⬇ DOWNLOAD</button>
+      <button class="btn-copy" onclick="copyUrl('${url}')">⎘ COPY URL</button>
+    </div>
+  `;
+  box.classList.add('show');
+  box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
-function drawCircleImage(ctx, img, cx, cy, r) {
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(cx, cy, r, 0, Math.PI * 2);
-    ctx.closePath();
-    ctx.clip();
-    ctx.drawImage(img, cx-r, cy-r, r*2, r*2);
-    ctx.restore();
+function imgError(id) {
+  showError(id, 'Gambar gagal dimuat. Cek koneksi atau parameter input.');
 }
 
-function loadImg(src) {
-    return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        img.onload = () => resolve(img);
-        img.onerror = reject;
-        img.src = src;
-    });
+function showError(id, msg) {
+  const e = document.getElementById('err-' + id);
+  e.textContent = '⚠ ' + msg;
+  e.classList.add('show');
+  const box = document.getElementById('result-' + id);
+  box.classList.remove('show');
 }
 
-async function loadFonts() {
-    if (fontsLoaded) return;
-    for (const f of FONT_ASSETS) {
-        if(DOM.loadingSub) DOM.loadingSub.textContent = `Memuat font ${f.name}...`;
-        const font = new FontFace(f.family, `url(${f.url})`);
-        const loaded = await font.load();
-        document.fonts.add(loaded);
-    }
-    fontsLoaded = true;
+function clearError(id) {
+  const e = document.getElementById('err-' + id);
+  if(e) e.classList.remove('show');
 }
 
-// =============================================
-// MAIN RENDER ENGINE
-// =============================================
-async function generate() {
-    const chatText = DOM.chatText.value.trim() || 'oy';
-    const platform = DOM.platformSelect.value;
-    const theme = DOM.themeSelect.value; 
-    
-    if (!chatText) { showError('Pesan chat tidak boleh kosong.'); return; }
-
-    DOM.loading.classList.add('active');
-    DOM.errorMsg.classList.remove('show');
-    await new Promise(r => setTimeout(r, 50)); 
-
-    try {
-        await loadFonts();
-        
-        const canvas = document.createElement('canvas');
-        canvas.width  = 1080 * 2;
-        canvas.height = 2280 * 2;
-        const ctx = canvas.getContext('2d');
-        ctx.scale(2, 2);
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
-
-        if (platform === 'tiktok') {
-            await renderTikTok(ctx, chatText);
-        } else {
-            await renderWhatsApp(ctx, chatText, theme);
-        }
-
-        currentDataUrl = canvas.toDataURL('image/png');
-        DOM.canvas.src = currentDataUrl;
-        
-        const finalImg = new Image();
-        finalImg.src = currentDataUrl;
-        finalImg.style.width = '100%';
-        finalImg.style.display = 'block';
-        finalImg.style.borderRadius = '12px';
-        
-        const wrapper = DOM.canvas.parentNode;
-        wrapper.innerHTML = ''; 
-        wrapper.appendChild(finalImg);
-
-        DOM.loading.classList.remove('active');
-        DOM.resultSection.classList.add('show');
-        showToast();
-        
-        setTimeout(() => {
-            DOM.resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 100);
-
-    } catch(err) {
-        DOM.loading.classList.remove('active');
-        showError('Gagal generate: ' + err.message);
-        console.error(err);
-    }
-}
-
-// =============================================
-// ENGINE: RENDER TIKTOK
-// =============================================
-async function renderTikTok(ctx, chatText) {
-    const username = DOM.username.value.trim() || 'Lutzz';
-    
-    if (!templateImageCache) {
-        if(DOM.loadingSub) DOM.loadingSub.textContent = 'Memuat template TikTok...';
-        templateImageCache = await loadImg(TEMPLATE_URL);
-    }
-
-    let avatarImage;
-    if (avatarDataUrl) {
-        avatarImage = await loadImg(avatarDataUrl);
-    } else {
-        avatarImage = await loadImg('https://cdn.jsdelivr.net/gh/Ditzzx-vibecoder/Assets@6b71d84a580f385bd7ee36402df5341ead4770a0/Image/artworks-gWLRE6HyPH3DgVMG-ZFFxtg-t500x500.jpg');
-    }
-
-    ctx.clearRect(0, 0, 1080, 2280);
-    ctx.drawImage(templateImageCache, 0, 0, 1080, 2280);
-
-    drawCircleImage(ctx, avatarImage, tkConfig.topPPX, tkConfig.topPPY, tkConfig.topPPRadius);
-
-    ctx.font = `bold ${tkConfig.topNameSize}px 'Plus Jakarta Sans', sans-serif`;
-    ctx.fillStyle = '#000000';
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(username, tkConfig.topNameX, tkConfig.topNameY);
-
-    ctx.font = `500 ${tkConfig.textSize}px 'Plus Jakarta Sans', sans-serif`;
-    const lines = wrapText(ctx, chatText, tkConfig.bubbleWidth - 52);
-    const lineH = tkConfig.textSize * 1.45;
-
-    let maxW = 0;
-    for (const l of lines) maxW = Math.max(maxW, ctx.measureText(l).width);
-
-    const padX = 30, padY = 24;
-    const bubbleW = Math.max(maxW + padX*2, 180);
-    const bubbleH = lines.length * lineH + padY*2;
-    const bubbleX = tkConfig.textX - padX;
-    const bubbleY = tkConfig.textY - padY;
-
-    drawCircleImage(ctx, avatarImage, tkConfig.chatPPX, bubbleY + bubbleH/2, tkConfig.chatPPRadius);
-    drawRoundedRect(ctx, bubbleX, bubbleY, bubbleW, bubbleH, 35, tkConfig.bubbleBgColor);
-
-    ctx.fillStyle = tkConfig.textColor;
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'middle';
-    lines.forEach((line, i) => {
-        const lineY = tkConfig.textY + i * lineH + tkConfig.textSize / 2;
-        ctx.fillText(line, tkConfig.textX, lineY);
-    });
-
-    const menuX = 90, menuY = bubbleY + bubbleH + 28;
-    drawRoundedRect(ctx, menuX, menuY, 565, 580, 40, '#ffffff', 'rgba(0,0,0,0.02)', true);
-
-    const itemH = 90, iconX = menuX + 60, labelX = menuX + 130;
-    TIKTOK_MENU.forEach((item, i) => {
-        const cy = menuY + 25 + i * itemH + itemH/2;
-        ctx.fillStyle = item.color;
-        ctx.font = `900 34px 'Font Awesome 6 Free'`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(item.unicode, iconX, cy);
-        ctx.font = `500 34px 'Plus Jakarta Sans', sans-serif`;
-        ctx.textAlign = 'left';
-        ctx.fillText(item.text, labelX, cy);
-    });
-}
-
-// =============================================
-// ENGINE: RENDER WHATSAPP (ULTRA REALISTIC)
-// =============================================
-async function renderWhatsApp(ctx, chatText, theme) {
-    if(DOM.loadingSub) DOM.loadingSub.textContent = 'Membangun Lingkungan iOS WA...';
-    
-    const iosFont = `-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif`;
-    const emojiFont = `"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif`;
-
-    let bg, menuBg, bubbleBg, textCol, separatorCol, timeCol, tickCol, plusBg, plusIcon, blurBgIn, blurBgOut, shadowCol, focusDim;
-
-    // KALIBRASI WARNA 99% MATCH DENGAN GAMBAR REFERENSI
-    if (theme === 'dark') {
-        bg = '#0B141A'; // Latar belakang hitam keabuan khas WA
-        menuBg = '#1E1E1E'; // Menu pop-up gelap
-        bubbleBg = '#005C4B'; // Hijau tua sent bubble
-        textCol = '#FFFFFF';
-        separatorCol = '#38383A';
-        timeCol = '#8696A0'; // Abu-abu waktu
-        tickCol = '#53BDEB'; // Centang biru terang
-        plusBg = '#3A3A3C';
-        plusIcon = '#A1A1A6';
-        blurBgIn = '#202C33'; // Received message blur
-        blurBgOut = '#005C4B'; // Sent message blur
-        shadowCol = 'rgba(0,0,0,0.7)';
-        focusDim = 'rgba(0,0,0,0.4)'; // Efek gelap saat menu terbuka
-    } else if (theme === 'light') {
-        bg = '#EFE7E0'; // Background terang WA (creamy grey)
-        menuBg = '#F9F9F9'; // Menu putih terang
-        bubbleBg = '#D9FDD3'; // Hijau pastel khas WA Light
-        textCol = '#000000';
-        separatorCol = '#E5E5EA';
-        timeCol = '#667781'; // Abu-abu gelap waktu
-        tickCol = '#53BDEB'; // Centang biru
-        plusBg = '#E5E5EA';
-        plusIcon = '#8E8E93';
-        blurBgIn = '#FFFFFF'; // Received blur
-        blurBgOut = '#D9FDD3'; // Sent blur
-        shadowCol = 'rgba(0,0,0,0.12)';
-        focusDim = 'rgba(255,255,255,0.4)'; // Efek terang fokus
-    } else if (theme === 'pink') {
-        bg = '#F4EAEB'; // Background abu kemerahan pucat
-        menuBg = '#F9F9F9'; 
-        bubbleBg = '#FFB4C2'; // Warna merah muda pastel sesuai gambar
-        textCol = '#000000';
-        separatorCol = '#E5E5EA';
-        timeCol = '#8A6A71'; // Warna waktu merah tua pudar
-        tickCol = '#E5395E'; // Centang merah muda tegas
-        plusBg = '#E5E5EA';
-        plusIcon = '#8E8E93';
-        blurBgIn = '#FFFFFF'; 
-        blurBgOut = '#FFB4C2'; 
-        shadowCol = 'rgba(0,0,0,0.12)';
-        focusDim = 'rgba(255,255,255,0.3)';
-    }
-    
-    // 1. Gambar Base Background
-    ctx.clearRect(0, 0, 1080, 2280);
-    ctx.fillStyle = bg;
-    ctx.fillRect(0, 0, 1080, 2280);
-    
-    // 2. Gambar Riwayat Chat yang Di-Blur (Simulasi History)
-    ctx.filter = 'blur(18px)';
-    // Area Kanan Atas (Sent)
-    drawRoundedRect(ctx, 400, 200, 600, 180, 35, blurBgOut); 
-    // Area Kiri Tengah (Received - Avatar area placeholder)
-    ctx.fillStyle = '#FF5C5C'; // Dummy red avatar color
-    ctx.beginPath(); ctx.arc(130, 520, 45, 0, Math.PI*2); ctx.fill();
-    drawRoundedRect(ctx, 200, 450, 450, 150, 35, blurBgIn);  
-    // Area Kiri Bawah (Received panjang)
-    drawRoundedRect(ctx, 200, 650, 750, 250, 35, blurBgIn); 
-    // Area Kanan Bawah sebelum target (Sent)
-    drawRoundedRect(ctx, 350, 950, 650, 200, 35, blurBgOut); 
-    ctx.filter = 'none';
-
-    // 3. Efek Dimming Overlay (Fokus hanya pada pesan yang dipilih)
-    ctx.fillStyle = focusDim;
-    ctx.fillRect(0, 0, 1080, 2280);
-
-    // Kalkulasi Dimensi Bubble Target
-    ctx.font = `400 34px ${iosFont}`;
-    const lines = wrapText(ctx, chatText, 600);
-    const lineH = 48;
-    let maxW = 50;
-    for(let l of lines) maxW = Math.max(maxW, ctx.measureText(l).width);
-    
-    const bubbleW = maxW + 160; 
-    const bubbleH = lines.length * lineH + 50;
-    const bubbleX = 1000 - bubbleW; 
-    const bubbleY = 1250; 
-    
-    // 4. Draw Bubble Chat Aktif (Pesan yang ditahan)
-    ctx.fillStyle = bubbleBg;
-    ctx.beginPath();
-    const r = 35;
-    ctx.moveTo(bubbleX + r, bubbleY);
-    ctx.lineTo(bubbleX + bubbleW - r, bubbleY);
-    ctx.quadraticCurveTo(bubbleX + bubbleW, bubbleY, bubbleX + bubbleW, bubbleY + r);
-    // Ekor chat kanan bawah
-    ctx.lineTo(bubbleX + bubbleW, bubbleY + bubbleH - 6); 
-    ctx.quadraticCurveTo(bubbleX + bubbleW, bubbleY + bubbleH, bubbleX + bubbleW - 6, bubbleY + bubbleH);
-    ctx.lineTo(bubbleX + r, bubbleY + bubbleH);
-    ctx.quadraticCurveTo(bubbleX, bubbleY + bubbleH, bubbleX, bubbleY + bubbleH - r);
-    ctx.lineTo(bubbleX, bubbleY + r);
-    ctx.quadraticCurveTo(bubbleX, bubbleY, bubbleX + r, bubbleY);
-    ctx.closePath();
-    ctx.fill();
-    
-    // Teks Pesan
-    ctx.fillStyle = textCol;
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'top';
-    ctx.font = `400 34px ${iosFont}`;
-    lines.forEach((line, i) => {
-        ctx.fillText(line, bubbleX + 30, bubbleY + 22 + (i * lineH));
-    });
-    
-    // Waktu (Timestamp)
-    ctx.font = `500 22px ${iosFont}`;
-    ctx.fillStyle = timeCol;
-    ctx.textAlign = 'right';
-    const timeY = bubbleY + bubbleH - 32;
-    ctx.fillText('22.39', bubbleX + bubbleW - 75, timeY + 2);
-    
-    // Centang
-    ctx.fillStyle = tickCol;
-    ctx.font = `900 24px 'Font Awesome 6 Free'`;
-    ctx.fillText('\uf560', bubbleX + bubbleW - 25, timeY);
-
-    // =============================================
-    // 5. DRAW REACTION PILL (Gaya iOS Kompak)
-    // =============================================
-    const pillW = 550; 
-    const pillH = 96;
-    const pillX = bubbleX + bubbleW - pillW; 
-    const pillY = bubbleY - pillH - 20;
-    
-    ctx.shadowColor = shadowCol;
-    ctx.shadowBlur = 45;
-    ctx.shadowOffsetY = 15;
-    drawRoundedRect(ctx, pillX, pillY, pillW, pillH, 48, menuBg);
-    ctx.shadowColor = 'transparent';
-    
-    const emojis = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
-    ctx.font = `56px ${emojiFont}`; 
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    
-    const startX = pillX + 52;
-    const spacing = 75;
-    
-    emojis.forEach((em, i) => {
-        ctx.fillText(em, startX + (i * spacing), pillY + pillH/2 + 4);
-    });
-    
-    // Tombol Plus (+)
-    const plusBtnX = startX + (6 * spacing) - 10;
-    ctx.fillStyle = plusBg; 
-    ctx.beginPath();
-    ctx.arc(plusBtnX, pillY + pillH/2, 30, 0, Math.PI*2);
-    ctx.fill();
-    
-    ctx.fillStyle = plusIcon; 
-    ctx.font = `500 34px ${iosFont}`;
-    ctx.fillText('+', plusBtnX, pillY + pillH/2 + 2);
-
-    // =============================================
-    // 6. DRAW CONTEXT MENU
-    // =============================================
-    const waMenu = [
-        { unicode: '\uf3e5', text: 'Balas',           color: textCol },
-        { unicode: '\uf064', text: 'Teruskan',        color: textCol },
-        { unicode: '\uf0c5', text: 'Salin',           color: textCol },
-        { unicode: '\uf304', text: 'Edit',            color: textCol },
-        { unicode: '\uf05a', text: 'Info',            color: textCol },
-        { unicode: '\uf006', text: 'Beri bintang',    color: textCol },
-        { unicode: '\uf2ed', text: 'Hapus',           color: '#FF3B30' }, 
-    ];
-
-    const menuW = 500;
-    const itemH = 88;
-    const menuH = waMenu.length * itemH;
-    const menuX = bubbleX + bubbleW - menuW; 
-    const menuY = bubbleY + bubbleH + 25;
-    
-    ctx.shadowColor = shadowCol;
-    ctx.shadowBlur = 50;
-    ctx.shadowOffsetY = 20;
-    drawRoundedRect(ctx, menuX, menuY, menuW, menuH, 32, menuBg);
-    ctx.shadowColor = 'transparent';
-    
-    waMenu.forEach((item, i) => {
-        const itemY = menuY + (i * itemH);
-        
-        ctx.fillStyle = item.color;
-        ctx.font = `400 34px ${iosFont}`;
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(item.text, menuX + 35, itemY + itemH/2);
-        
-        ctx.font = `900 30px 'Font Awesome 6 Free'`;
-        ctx.textAlign = 'right';
-        ctx.fillText(item.unicode, menuX + menuW - 35, itemY + itemH/2);
-        
-        if (i < waMenu.length - 1) {
-            ctx.fillStyle = separatorCol;
-            ctx.fillRect(menuX + 35, itemY + itemH, menuW - 35, 1.5);
-        }
-    });
-}
-
-// =============================================
-// GLOBAL LISTENERS
-// =============================================
-function showToast() {
-    DOM.toast.classList.add('show');
-    setTimeout(() => DOM.toast.classList.remove('show'), 4000);
-}
-
-function showError(msg) {
-    DOM.errorText.textContent = msg;
-    DOM.errorMsg.classList.add('show');
-    setTimeout(() => DOM.errorMsg.classList.remove('show'), 5000);
-}
-
-DOM.generateBtn.addEventListener('click', generate);
-
-DOM.downloadBtn.addEventListener('click', () => {
-    if (!currentDataUrl) { showError('Tidak ada gambar'); return; }
-    
-    let fileName = `XAERISOFT-${DOM.platformSelect.value.toUpperCase()}`;
-    if (DOM.platformSelect.value === 'whatsapp') {
-        fileName += `-${DOM.themeSelect.value.toUpperCase()}`;
-    }
-    fileName += `-${Date.now()}.png`;
-
+// ── DOWNLOAD ──
+async function downloadImg(url, id) {
+  try {
+    showToast('Mengunduh gambar...');
     const a = document.createElement('a');
-    a.href = currentDataUrl;
-    a.download = fileName;
-    document.body.appendChild(a); 
-    a.click(); 
+    a.href = url;
+    a.download = 'tools-' + id + '-' + Date.now() + '.png';
+    a.target = '_blank';
+    document.body.appendChild(a);
+    a.click();
     document.body.removeChild(a);
-});
+  } catch(e) {
+    showToast('Download gagal: buka URL langsung.');
+    window.open(url, '_blank');
+  }
+}
 
-DOM.newBtn.addEventListener('click', () => {
-    DOM.resultSection.classList.remove('show');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-});
+// ── COPY URL ──
+function copyUrl(url) {
+  navigator.clipboard.writeText(url).then(() => showToast('URL disalin!')).catch(() => showToast('Gagal menyalin.'));
+}
 
-document.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey && document.activeElement !== DOM.chatText
-        && !DOM.loading.classList.contains('active')) DOM.generateBtn.click();
-});
+// ── BUILD URLS & GENERATE ──
+function encode(s) { return encodeURIComponent(s); }
+
+function generate(id) {
+  clearError(id);
+  let url = '';
+
+  if (id === 'wmp1') {
+    const text = document.getElementById('wmp1-text').value.trim();
+    if (!text) return showToast('Isi teks terlebih dahulu!');
+    url = `https://apii.nexadev.my.id/wmp1?text=${encode(text)}`;
+
+  } else if (id === 'wmp2') {
+    const text = document.getElementById('wmp2-text').value.trim();
+    if (!text) return showToast('Isi teks terlebih dahulu!');
+    url = `https://apii.nexadev.my.id/wmp2?text=${encode(text)}`;
+
+  } else if (id === 'fakeff') {
+    const usn = document.getElementById('fakeff-usn').value.trim();
+    if (!usn) return showToast('Isi username terlebih dahulu!');
+    url = `https://apii.nexadev.my.id/fakeff?usn=${encode(usn)}`;
+
+  } else if (id === 'fakeffduo') {
+    const n1 = document.getElementById('ffduo-name1').value.trim();
+    const n2 = document.getElementById('ffduo-name2').value.trim();
+    if (!n1 || !n2) return showToast('Isi kedua nama!');
+    url = `http://api.nexadev.my.id/api/canvas/fakeffduo/?name1=${encode(n1)}&name2=${encode(n2)}`;
+
+  } else if (id === 'nokia') {
+    const text  = document.getElementById('nokia-text').value.trim();
+    const from  = document.getElementById('nokia-from').value.trim();
+    const date  = document.getElementById('nokia-date').value.trim();
+    const time  = document.getElementById('nokia-time').value.trim();
+    const title = document.getElementById('nokia-title').value.trim();
+    if (!text) return showToast('Isi pesan Nokia!');
+    url = `https://apii.nexadev.my.id/nokia?text=${encode(text)}&from=${encode(from)}&date=${encode(date)}&time=${encode(time)}&title=${encode(title)}`;
+
+  // BAGIAN IQC SUDAH DIHAPUS DARI SINI
+
+  } else if (id === 'ttqc') {
+    const imgUrl = uploadedUrls['ttqc'];
+    const name   = document.getElementById('ttqc-name').value.trim();
+    const text   = document.getElementById('ttqc-text').value.trim();
+    if (!name || !text) return showToast('Isi nama dan teks!');
+    url = `https://apii.nexadev.my.id/ttqc?url=${encode(imgUrl || '')}&name=${encode(name)}&text=${encode(text)}`;
+
+  } else if (id === 'iqcimg') {
+    const imgUrl = uploadedUrls['iqcimg'];
+    const text   = document.getElementById('iqcimg-text').value.trim();
+    const time   = document.getElementById('iqcimg-time').value.trim();
+    if (!text) return showToast('Isi teks!');
+    url = `https://apii.nexadev.my.id/iqc-dark?text=${encode(text)}&time=${encode(time)}&url=${encode(imgUrl || '')}`;
+
+  } else if (id === 'musiccard') {
+    const judul = document.getElementById('musiccard-judul').value.trim();
+    const nama  = document.getElementById('musiccard-nama').value.trim();
+    const imgUrl = uploadedUrls['musiccard'];
+    if (!judul || !nama) return showToast('Isi judul dan nama artis!');
+    url = `https://api.nexray.eu.cc/canvas/musiccard?judul=${encode(judul)}&nama=${encode(nama)}&image_url=${encode(imgUrl || '')}`;
+
+  } else if (id === 'botak') {
+    const imgUrl = uploadedUrls['botak'];
+    if (!imgUrl) return showToast('Upload foto terlebih dahulu!');
+    url = `https://api.nexray.eu.cc/ephoto/botak?url=${encode(imgUrl)}`;
+
+  } else if (id === 'chibi') {
+    const imgUrl = uploadedUrls['chibi'];
+    if (!imgUrl) return showToast('Upload foto terlebih dahulu!');
+    url = `https://api.nexray.eu.cc/ephoto/chibi?url=${encode(imgUrl)}`;
+
+  } else if (id === 'figure') {
+    const imgUrl = uploadedUrls['figure'];
+    if (!imgUrl) return showToast('Upload foto terlebih dahulu!');
+    url = `https://api.nexray.eu.cc/ephoto/v1/figure?url=${encode(imgUrl)}`;
+
+  } else if (id === 'nft') {
+    const imgUrl = uploadedUrls['nft'];
+    if (!imgUrl) return showToast('Upload foto terlebih dahulu!');
+    url = `https://api.nexray.eu.cc/ephoto/nft?url=${encode(imgUrl)}`;
+
+  } else if (id === 'mafia') {
+    const imgUrl = uploadedUrls['mafia'];
+    if (!imgUrl) return showToast('Upload foto terlebih dahulu!');
+    url = `https://api.nexray.eu.cc/ephoto/mafia?url=${encode(imgUrl)}`;
+
+  } else if (id === 'hitam') {
+    const imgUrl = uploadedUrls['hitam'];
+    if (!imgUrl) return showToast('Upload foto terlebih dahulu!');
+    url = `https://api.nexray.eu.cc/ephoto/hitam?url=${encode(imgUrl)}`;
+
+  } else if (id === 'mountain') {
+    const imgUrl = uploadedUrls['mountain'];
+    if (!imgUrl) return showToast('Upload foto terlebih dahulu!');
+    url = `https://api.nexray.eu.cc/ephoto/mountain?url=${encode(imgUrl)}`;
+
+  } else if (id === 'mirror') {
+    const imgUrl = uploadedUrls['mirror'];
+    if (!imgUrl) return showToast('Upload foto terlebih dahulu!');
+    url = `https://api.nexray.eu.cc/ephoto/mirror?url=${encode(imgUrl)}`;
+
+  } else if (id === 'playlist') {
+    const imgUrl = uploadedUrls['playlist'];
+    if (!imgUrl) return showToast('Upload foto terlebih dahulu!');
+    url = `https://api.nexray.eu.cc/ephoto/playlist?url=${encode(imgUrl)}`;
+
+  } else if (id === 'figure2') {
+    const imgUrl = uploadedUrls['figure2'];
+    if (!imgUrl) return showToast('Upload foto terlebih dahulu!');
+    url = `https://api.nexray.eu.cc/ephoto/v2/figure?url=${encode(imgUrl)}`;
+  } else if (id === 'iqcdark') {
+    const text = document.getElementById('iqcdark-text').value.trim();
+    const time = document.getElementById('iqcdark-time').value.trim();
+    if (!text) return showToast('Isi teks!');
+    url = `https://apii.nexadev.my.id/iqc-dark?text=${encode(text)}&time=${encode(time)}`;
+  }
+
+  if (!url) return;
+
+  // Loading state
+  const btn = event.currentTarget;
+  btn.classList.add('loading');
+  btn.innerHTML = '<span class="spinner"></span> GENERATING...';
+
+  // Simulate load then show image
+  const img = new Image();
+  img.onload = () => {
+    btn.classList.remove('loading');
+    btn.textContent = '⚡ GENERATE';
+    showResult(id, url);
+    showToast('Gambar berhasil dibuat!');
+  };
+  img.onerror = () => {
+    btn.classList.remove('loading');
+    btn.textContent = '⚡ GENERATE';
+    // Still show — some APIs return binary directly
+    showResult(id, url);
+    showToast('Cek hasil di bawah.');
+  };
+  img.src = url + '&_t=' + Date.now();
+}
+
+// ── DRAG & DROP UPLOAD ──
+function onDragOver(e, id) {
+  e.preventDefault();
+  document.getElementById('drop-' + id).classList.add('dragover');
+}
+
+function onDragLeave(e, id) {
+  document.getElementById('drop-' + id).classList.remove('dragover');
+}
+
+function onDrop(e, id) {
+  e.preventDefault();
+  document.getElementById('drop-' + id).classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) uploadFile(id, file);
+}
+
+function handleFile(id) {
+  const input = document.getElementById('file-' + id);
+  if (input.files[0]) uploadFile(id, input.files[0]);
+}
+
+function removeUpload(id) {
+  uploadedUrls[id] = null;
+  document.getElementById('preview-' + id).classList.remove('show');
+  document.getElementById('file-' + id).value = '';
+  document.getElementById('drop-' + id).style.display = '';
+}
+
+async function uploadFile(id, file) {
+  const drop = document.getElementById('drop-' + id);
+  const preview = document.getElementById('preview-' + id);
+  const previewImg = document.getElementById('preview-img-' + id);
+  const previewFname = document.getElementById('preview-fname-' + id);
+  const previewUrl = document.getElementById('preview-url-' + id);
+
+  // Local preview
+  const reader = new FileReader();
+  reader.onload = e => { previewImg.src = e.target.result; };
+  reader.readAsDataURL(file);
+  previewFname.textContent = file.name;
+  previewUrl.textContent = 'Mengupload...';
+  preview.classList.add('show');
+  drop.style.display = 'none';
+
+  // Upload to Nexa uploader
+  try {
+    const formData = new FormData();
+    formData.append('files[]', file);
+    const res = await fetch('https://api.nexadev.my.id/uploder/', {
+      method: 'POST',
+      body: formData
+    });
+    const data = await res.json();
+    if (data.success && data.files && data.files[0] && data.files[0].url) {
+      uploadedUrls[id] = data.files[0].url;
+      previewUrl.textContent = data.files[0].url;
+      showToast('Upload berhasil!');
+    } else {
+      throw new Error('Upload gagal');
+    }
+  } catch(err) {
+    previewUrl.textContent = '⚠ Upload gagal — coba lagi.';
+    uploadedUrls[id] = null;
+    showToast('Upload gagal!');
+  }
+}
