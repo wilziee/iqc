@@ -2,113 +2,117 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lobby Generator // Cyber Edition</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>XAERISOFT Chat Studio</title>
+    <!-- Modern Font: Inter for readability, Space Grotesk for Cyber feel -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-<!-- Ambient Ambient & Particle Layer -->
-<canvas id="cyberParticles"></canvas>
-<div class="ambient-glow glow-cyan"></div>
-<div class="ambient-glow glow-purple"></div>
-
-<div class="container-wrapper">
-    <main class="cyber-card">
-        <!-- Top Tech Bar / Corner Deco -->
-        <div class="card-deco-line"></div>
-        
-        <div class="card-header">
-            <div class="header-main">
-                <h1 class="cyber-brand"><i class="fas fa-satellite-dish pulse-icon"></i> TERMINAL_LOBBY</h1>
-                <span class="cyber-sub-brand">CORE GENERATOR v2.0 // PREMIUM</span>
-            </div>
-            <div class="status-node">
-                <span class="status-pulse"></span>
-                <span class="status-label">SYS_ONLINE</span>
-            </div>
+    <!-- Dynamic Universe Background -->
+    <div class="universe-bg">
+        <div class="aurora aurora-1"></div>
+        <div class="aurora aurora-2"></div>
+        <div class="stars"></div>
+        <div class="meteors">
+            <div class="meteor"></div>
+            <div class="meteor"></div>
+            <div class="meteor"></div>
+            <div class="meteor"></div>
         </div>
+        <div class="particles"></div>
+    </div>
 
-        <!-- Alert System -->
-        <div class="cyber-alert" id="errorMessage">
-            <i class="fas fa-exclamation-triangle"></i>
-            <span id="errorText">CRITICAL_ERROR: Process aborted.</span>
-        </div>
+    <!-- Main Workspace -->
+    <div class="container-wrapper">
+        <main class="glass-card">
+            <header class="studio-header">
+                <div class="logo-group">
+                    <div class="pulse-ring"></div>
+                    <i class="fas fa-microchip cyber-icon"></i>
+                    <h1 class="brand-name">XAERISOFT <span>STUDIO</span></h1>
+                </div>
+                <div class="status-badge">
+                    <span class="status-dot"></span> v2.0
+                </div>
+            </header>
 
-        <!-- Core Input Matrix -->
-        <section class="matrix-section">
-            <div class="matrix-input-group">
-                <label class="matrix-label"><i class="fas fa-terminal"></i> USER_IDENTITY</label>
+            <div class="input-grid">
                 <div class="input-wrapper">
-                    <input type="text" id="username" class="matrix-input" placeholder="Enter codename..." maxlength="20">
-                    <span class="input-glow-bar"></span>
+                    <label><i class="fas fa-user-astronaut"></i> ID / Username</label>
+                    <input type="text" id="username" class="neon-input" placeholder="Masukkan identitas..." autocomplete="off">
+                </div>
+                
+                <div class="input-wrapper">
+                    <label><i class="fas fa-comment-dots"></i> Transmisi Pesan</label>
+                    <textarea id="chatText" class="neon-input" placeholder="Ketik transmisi pesan di sini..."></textarea>
+                </div>
+
+                <div class="input-wrapper">
+                    <label><i class="fas fa-user-circle"></i> Visual Avatar</label>
+                    <div class="drop-zone" id="dropZone">
+                        <input type="file" id="avatarFile" accept="image/*" hidden>
+                        <img class="avatar-preview" id="avatarThumb" src="" alt="Avatar">
+                        <div class="dz-content" id="dzContent">
+                            <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                            <span class="dz-text">Inisialisasi Avatar</span>
+                            <span class="dz-subtext">Drop image or click</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error Banner -->
+            <div class="cyber-alert" id="errorMessage">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span id="errorText">Sistem mendeteksi anomali.</span>
+            </div>
+
+            <!-- Action Area -->
+            <button class="btn-generate" id="generateBtn">
+                <span class="btn-text">INITIALIZE RENDER</span>
+                <i class="fas fa-bolt"></i>
+            </button>
+
+            <!-- Result Area -->
+            <div class="result-panel" id="resultSection">
+                <div class="canvas-wrapper">
+                    <canvas id="canvasPreview"></canvas>
+                </div>
+                <div class="action-grid">
+                    <button class="btn-cyber btn-download" id="downloadBtn">
+                        <i class="fas fa-download"></i> Simpan
+                    </button>
+                    <button class="btn-cyber btn-reset" id="newBtn">
+                        <i class="fas fa-sync-alt"></i> Reset
+                    </button>
                 </div>
             </div>
             
-            <div class="matrix-input-group">
-                <label class="matrix-label"><i class="fas fa-layer-group"></i> ENVIRONMENT_SECTOR</label>
-                <div class="input-wrapper select-container">
-                    <select id="lobbySelect" class="matrix-input matrix-select">
-                        <option value="0">Initialize Random Sector</option>
-                    </select>
-                    <span class="input-glow-bar"></span>
-                </div>
-            </div>
-        </section>
-
-        <!-- Command Execution Button -->
-        <button class="action-trigger main-trigger" id="generateBtn" disabled>
-            <span class="btn-inner">
-                <i class="fas fa-bolt-lightning"></i> EXECUTE CORE GENERATION
-            </span>
-        </button>
-
-        <!-- Dynamic Output Section -->
-        <section class="output-container" id="resultSection">
-            <div class="canvas-viewport">
-                <canvas id="resultCanvas"></canvas>
-                <div class="crt-scanline"></div>
-                <div class="view-corners"></div>
-            </div>
-            <div class="control-grid">
-                <button class="action-trigger download-trigger" id="downloadBtn">
-                    <span class="btn-inner"><i class="fas fa-download"></i> DOWNLOAD ASSET</span>
-                </button>
-                <button class="action-trigger reset-trigger" id="newBtn">
-                    <span class="btn-inner"><i class="fas fa-power-off"></i> REBOOT_SYS</span>
-                </button>
-            </div>
-        </section>
-
-        <!-- Footer -> Created by Wilxd -->
-        <footer class="card-footer">
-            <div class="architecture-credit">CREATED BY <span class="coder-tag">WILXD</span></div>
-        </footer>
-    </main>
-</div>
-
-<!-- Quantum Loading Overlay -->
-<div class="quantum-overlay" id="loadingOverlay">
-    <div class="cyber-spinner-matrix">
-        <div class="spinner-core"></div>
-        <div class="spinner-ring ring-1"></div>
-        <div class="spinner-ring ring-2"></div>
+            <footer class="cyber-footer">
+                <p>ENGINEERED BY <span>XAERISOFT</span></p>
+            </footer>
+        </main>
     </div>
-    <h3 class="loading-headline">COMPILING_METADATA</h3>
-    <p class="loading-subtext" id="loadingSub">Connecting to database...</p>
-</div>
 
-<!-- Holographic Notification Toast -->
-<div class="holo-toast" id="notification">
-    <div class="toast-indicator-bar"></div>
-    <i class="fas fa-circle-check toast-icon"></i>
-    <div class="toast-msg">
-        <h5>TRANSMISSION_COMPLETE</h5>
-        <p>Asset successfully compiled & signed 🔥</p>
+    <!-- Loading Matrix -->
+    <div class="loading-matrix" id="loadingOverlay">
+        <div class="cyber-spinner"></div>
+        <h2 class="loading-title">RENDERING PROTOCOL</h2>
+        <p class="loading-sub" id="loadingSub">Menghitung kalkulasi piksel...</p>
     </div>
-</div>
 
-<script src="script.js"></script>
+    <!-- Cyber Notification -->
+    <div class="toast-notification" id="notification">
+        <div class="toast-icon"><i class="fas fa-check-double"></i></div>
+        <div class="toast-body">
+            <h4>Render Sukses</h4>
+            <p>Aset visual siap digunakan.</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>

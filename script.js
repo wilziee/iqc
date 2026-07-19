@@ -1,261 +1,299 @@
-// ── INTEL HIGH-PERFORMANCE 60FPS PARTICLE SYSTEMS ─────
-const canvasBg = document.getElementById('cyberParticles');
-const ctxBg = canvasBg.getContext('2d');
-let particlesArray = [];
+/**
+ * XAERISOFT CHAT STUDIO ENGINE v2.0
+ * Completely Original Canvas Renderer
+ * No external template images. 100% Programmatic Canvas drawing.
+ */
 
-function fitCanvasToWindow() {
-    canvasBg.width = window.innerWidth;
-    canvasBg.height = window.innerHeight;
-}
-window.addEventListener('resize', fitCanvasToWindow);
-fitCanvasToWindow();
-
-class CyberParticle {
-    constructor() {
-        this.reset();
-    }
-    reset() {
-        this.x = Math.random() * canvasBg.width;
-        this.y = Math.random() * canvasBg.height;
-        this.size = Math.random() * 1.5 + 0.5;
-        this.speedX = (Math.random() - 0.5) * 0.4;
-        this.speedY = (Math.random() - 0.5) * 0.4;
-        this.color = Math.random() > 0.4 ? '#00f0ff' : '#9d00ff';
-    }
-    update() {
-        this.x += this.speedX;
-        this.y += this.speedY;
-        if (this.x < 0 || this.x > canvasBg.width || this.y < 0 || this.y > canvasBg.height) {
-            this.reset();
-        }
-    }
-    draw() {
-        ctxBg.fillStyle = this.color;
-        ctxBg.beginPath();
-        ctxBg.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctxBg.fill();
-    }
-}
-
-function initParticleField() {
-    particlesArray = [];
-    const density = Math.min((window.innerWidth * window.innerHeight) / 9000, 80);
-    for (let i = 0; i < density; i++) {
-        particlesArray.push(new CyberParticle());
-    }
-}
-
-function processParticleFrame() {
-    ctxBg.clearRect(0, 0, canvasBg.width, canvasBg.height);
-    // Render links between close particles for a premium cluster effect
-    ctxBg.strokeStyle = 'rgba(0, 240, 255, 0.03)';
-    ctxBg.lineWidth = 0.5;
-    
-    for (let i = 0; i < particlesArray.length; i++) {
-        particlesArray[i].update();
-        particlesArray[i].draw();
-    }
-    requestAnimationFrame(processParticleFrame); // High efficiency 60FPS loop
-}
-initParticleField();
-processParticleFrame();
-
-// ── MODERN RIPPLE ENGINE WITH INTERACTION GLOW ────────
-document.querySelectorAll('.action-trigger').forEach(btn => {
-    btn.addEventListener('click', function(e) {
-        const rect = this.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        
-        const ripple = document.createElement('span');
-        ripple.style.cssText = `
-            position: absolute; background: rgba(255, 255, 255, 0.25);
-            width: 120px; height: 120px; border-radius: 50%;
-            pointer-events: none; transform: translate(-50%, -50%) scale(0);
-            left: ${x}px; top: ${y}px; animation: ripOut 0.55s ease-out;
-        `;
-        this.appendChild(ripple);
-        setTimeout(() => ripple.remove(), 600);
-    });
-});
-
-const ripAnimStyle = document.createElement('style');
-ripAnimStyle.innerHTML = `@keyframes ripOut { to { transform: translate(-50%, -50%) scale(3); opacity: 0; } }`;
-document.head.appendChild(ripAnimStyle);
-
-// ── FIXED CORE APPLICATION LOGIC (PERSISTENT LOGIC) ──
-const CONFIG = {
-    canvas:   { width: 1920, height: 3416 },
-    username: {
-        a: 2650,       
-        b: 2790,       
-        c: 727,        
-        d: 1319,       
-        centerX: 1009, 
-        fontSize: 85,
-        maxChars: 20,
-    }
+const DOM = {
+    dropZone: document.getElementById('dropZone'),
+    avatarFile: document.getElementById('avatarFile'),
+    avatarThumb: document.getElementById('avatarThumb'),
+    username: document.getElementById('username'),
+    chatText: document.getElementById('chatText'),
+    generateBtn: document.getElementById('generateBtn'),
+    downloadBtn: document.getElementById('downloadBtn'),
+    newBtn: document.getElementById('newBtn'),
+    resultSection: document.getElementById('resultSection'),
+    canvas: document.getElementById('canvasPreview'),
+    errorMsg: document.getElementById('errorMessage'),
+    errorText: document.getElementById('errorText'),
+    loading: document.getElementById('loadingOverlay'),
+    toast: document.getElementById('notification')
 };
 
-const FONT_URL = '/asset/fonts/TeutonNormal.otf';
-let fontLoaded = false;
+let avatarDataUrl = null;
+let currentOutputUrl = null;
 
-// DOM Linkage[span_4](start_span)[span_4](end_span)
-const lobbySelect    = document.getElementById('lobbySelect');
-const generateBtn    = document.getElementById('generateBtn');
-const loadingOverlay = document.getElementById('loadingOverlay');
-const loadingSub     = document.getElementById('loadingSub');
-const resultSection  = document.getElementById('resultSection');
-const downloadBtn    = document.getElementById('downloadBtn');
-const newBtn         = document.getElementById('newBtn');
-const usernameInput  = document.getElementById('username');
-const errorMessage   = document.getElementById('errorMessage');
-const errorText      = document.getElementById('errorText');
-const notification   = document.getElementById('notification');
-const resultCanvas   = document.getElementById('resultCanvas');
+// Modern File Upload Handling
+DOM.dropZone.addEventListener('click', () => DOM.avatarFile.click());
+DOM.dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    DOM.dropZone.classList.add('active');
+});
+DOM.dropZone.addEventListener('dragleave', () => DOM.dropZone.classList.remove('active'));
+DOM.dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    DOM.dropZone.classList.remove('active');
+    handleFile(e.dataTransfer.files[0]);
+});
+DOM.avatarFile.addEventListener('change', (e) => handleFile(e.target.files[0]));
 
-// Populating Select matrix[span_5](start_span)[span_5](end_span)
-for (let i = 1; i <= 30; i++) {
-    const o = document.createElement('option');
-    o.value = i; o.textContent = `SECTOR // LOBBY_${String(i).padStart(2, '0')}`;
-    lobbySelect.appendChild(o);
-}
-
-function checkInput() {
-    generateBtn.disabled = usernameInput.value.trim().length === 0;
-}
-usernameInput.addEventListener('input', checkInput);
-checkInput();
-
-async function loadFont() {
-    if (fontLoaded) return;
-    loadingSub.textContent = 'Decrypting vector typography...';
-    try {
-        const font = new FontFace('TeutonNormal', `url(${FONT_URL})`);
-        const loaded = await font.load();
-        document.fonts.add(loaded);
-        fontLoaded = true;
-    } catch (err) {
-        console.warn('System typeface critical error, falling back to System Sans.');
+function handleFile(file) {
+    if (!file || !file.type.startsWith('image/')) {
+        showError('Format file ditolak. Gunakan format gambar.');
+        return;
     }
-}
-
-function loadImg(src) {
-    return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        img.onload  = () => resolve(img);
-        img.onerror = () => reject(new Error('Failed to cache segment map: ' + src));
-        img.src = src;
-    });
-}
-
-function drawGradientUsername(ctx, username, cfg) {
-    const { a, b, c, d, fontSize, maxChars, centerX } = cfg;
-    const name = String(username || 'Player').slice(0, maxChars);
-    const boxW = d - c;
-    const boxH = b - a;
-    const cx   = centerX ?? (c + boxW / 2);
-
-    let size = fontSize;
-    ctx.textAlign    = 'center';
-    ctx.textBaseline = 'middle';
-
-    while (size > 12) {
-        ctx.font = `${size}px TeutonNormal, Orbitron, sans-serif`;
-        if (ctx.measureText(name).width <= boxW) break;
-        size -= 1;
-    }
-
-    ctx.font = `${size}px TeutonNormal, Orbitron, sans-serif`;
-    const centerY = a + boxH / 2;
-    const textW   = ctx.measureText(name).width;
-    const gradX1  = cx - textW / 2;
-    const gradX2  = cx + textW / 2;
-
-    const grad = ctx.createLinearGradient(gradX1, centerY, gradX2, centerY);
-    grad.addColorStop(0.00, '#FFFDE7');
-    grad.addColorStop(0.35, '#FFE57F');
-    grad.addColorStop(0.70, '#FFB300');
-    grad.addColorStop(1.00, '#FF8F00');
-
-    ctx.save();
-    ctx.shadowColor   = 'rgba(0,0,0,0.95)';
-    ctx.shadowBlur    = 16;
-    ctx.shadowOffsetX = 4;
-    ctx.shadowOffsetY = 5;
-    ctx.fillStyle = grad;
-    ctx.fillText(name, cx, centerY);
-    ctx.restore();
-}
-
-async function generate() {
-    const username = usernameInput.value.trim();
-    let lobbyNum   = parseInt(lobbySelect.value);
-    if (!lobbyNum || lobbyNum < 1) lobbyNum = Math.floor(Math.random() * 30) + 1;
-
-    loadingOverlay.classList.add('active');
-    errorMessage.classList.remove('active');
-    generateBtn.disabled = true;
-
-    try {
-        await loadFont();
-        loadingSub.textContent = `Injecting environment module [0${lobbyNum}]...`;
-        const lobbyImg = await loadImg(`/asset/lobby/${lobbyNum}.jpg`);
-
-        loadingSub.textContent = 'Mapping data coordinates...';
-        const { width, height } = CONFIG.canvas;
-        resultCanvas.width  = width;
-        resultCanvas.height = height;
-
-        const ctx = resultCanvas.getContext('2d');
-        ctx.drawImage(lobbyImg, 0, 0, width, height);
-        drawGradientUsername(ctx, username, CONFIG.username);
-
-        loadingOverlay.classList.remove('active');
-        resultSection.classList.add('active');
-        showNotification();
-        resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-    } catch(err) {
-        loadingOverlay.classList.remove('active');
-        showError(err.message);
-        console.error(err);
-    } finally {
-        checkInput();
-    }
-}
-
-function showNotification() {
-    notification.classList.add('show');
-    setTimeout(() => notification.classList.remove('show'), 4000);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        avatarDataUrl = e.target.result;
+        DOM.avatarThumb.src = avatarDataUrl;
+        DOM.avatarThumb.classList.add('show');
+    };
+    reader.readAsDataURL(file);
 }
 
 function showError(msg) {
-    errorText.textContent = msg;
-    errorMessage.classList.add('active');
-    setTimeout(() => errorMessage.classList.remove('active'), 6000);
+    DOM.errorText.textContent = msg;
+    DOM.errorMsg.classList.add('show');
+    setTimeout(() => DOM.errorMsg.classList.remove('show'), 4000);
 }
 
-generateBtn.addEventListener('click', generate);
+function showToast() {
+    DOM.toast.classList.add('show');
+    setTimeout(() => DOM.toast.classList.remove('show'), 4000);
+}
 
-downloadBtn.addEventListener('click', () => {
-    const url = resultCanvas.toDataURL('image/jpeg', 1.0);
-    const a   = document.createElement('a');
-    a.href     = url;
-    a.download = `cyber-lobby-${usernameInput.value.trim()}-${Date.now()}.jpg`;
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-});
+// -----------------------------------------------------------------
+// ENGINE CANVAS: GLASSMORPHISM RENDERER (100% ORIGINAL)
+// -----------------------------------------------------------------
+function drawRoundedRect(ctx, x, y, width, height, radius) {
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + width - radius, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+    ctx.lineTo(x + width, y + height - radius);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    ctx.lineTo(x + radius, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.closePath();
+}
 
-newBtn.addEventListener('click', () => {
-    resultSection.classList.remove('active');
-    usernameInput.value = '';
-    checkInput();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-});
-
-document.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey && !loadingOverlay.classList.contains('active') && !generateBtn.disabled) {
-        generateBtn.click();
+function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+    const words = text.split(' ');
+    let line = '';
+    let currentY = y;
+    
+    for(let n = 0; n < words.length; n++) {
+        const testLine = line + words[n] + ' ';
+        const metrics = ctx.measureText(testLine);
+        const testWidth = metrics.width;
+        
+        if (testWidth > maxWidth && n > 0) {
+            ctx.fillText(line, x, currentY);
+            line = words[n] + ' ';
+            currentY += lineHeight;
+        } else {
+            line = testLine;
+        }
     }
+    ctx.fillText(line, x, currentY);
+    return currentY + lineHeight;
+}
+
+async function renderCanvas() {
+    const username = DOM.username.value.trim() || 'Anonymous';
+    const text = DOM.chatText.value.trim();
+
+    if (!text) return showError('Transmisi pesan tidak boleh kosong.');
+
+    DOM.loading.classList.add('active');
+    DOM.errorMsg.classList.remove('show');
+
+    // Beri waktu browser untuk memunculkan loading screen
+    await new Promise(r => setTimeout(r, 100));
+
+    try {
+        const canvas = document.createElement('canvas');
+        // Resolusi Tinggi untuk hasil Premium (1080x1080 Square Post)
+        canvas.width = 1080;
+        canvas.height = 1080;
+        const ctx = canvas.getContext('2d');
+
+        // 1. Draw Universe Background #050816 to #121A45
+        const bgGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        bgGradient.addColorStop(0, '#050816');
+        bgGradient.addColorStop(1, '#121A45');
+        ctx.fillStyle = bgGradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // 2. Draw Premium Glowing Nebula
+        const glow1 = ctx.createRadialGradient(200, 200, 0, 200, 200, 600);
+        glow1.addColorStop(0, 'rgba(108, 99, 255, 0.4)');
+        glow1.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = glow1;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const glow2 = ctx.createRadialGradient(800, 800, 0, 800, 800, 700);
+        glow2.addColorStop(0, 'rgba(0, 217, 255, 0.25)');
+        glow2.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = glow2;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Draw grid lines for Cyber feel
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+        ctx.lineWidth = 2;
+        for(let i=0; i<canvas.width; i+=80) {
+            ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(canvas.width, i); ctx.stroke();
+        }
+
+        // 3. Draw Glassmorphism Chat Bubble
+        ctx.font = '500 42px "Inter", sans-serif';
+        const maxWidth = 750;
+        const lineHeight = 65;
+        
+        // Calculate bubble height dynamically based on text
+        const words = text.split(' ');
+        let testLine = '';
+        let lineCount = 1;
+        for(let n = 0; n < words.length; n++) {
+            const temp = testLine + words[n] + ' ';
+            if(ctx.measureText(temp).width > maxWidth && n > 0) {
+                lineCount++; testLine = words[n] + ' ';
+            } else { testLine = temp; }
+        }
+
+        const padding = 50;
+        const bubbleW = 850;
+        const bubbleH = (lineCount * lineHeight) + (padding * 2) + 120; // 120 for header space
+        const bubbleX = (canvas.width - bubbleW) / 2;
+        const bubbleY = (canvas.height - bubbleH) / 2;
+
+        ctx.save();
+        // Shadow for floating effect
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
+        ctx.shadowBlur = 40;
+        ctx.shadowOffsetY = 20;
+
+        // Glass Fill
+        ctx.fillStyle = 'rgba(10, 16, 38, 0.6)'; // Translucent dark
+        drawRoundedRect(ctx, bubbleX, bubbleY, bubbleW, bubbleH, 30);
+        ctx.fill();
+        ctx.restore();
+
+        // Border Glow
+        ctx.lineWidth = 3;
+        const borderGrad = ctx.createLinearGradient(bubbleX, bubbleY, bubbleX+bubbleW, bubbleY+bubbleH);
+        borderGrad.addColorStop(0, 'rgba(0, 217, 255, 0.6)');
+        borderGrad.addColorStop(1, 'rgba(108, 99, 255, 0.3)');
+        ctx.strokeStyle = borderGrad;
+        drawRoundedRect(ctx, bubbleX, bubbleY, bubbleW, bubbleH, 30);
+        ctx.stroke();
+
+        // 4. Load & Draw Avatar
+        let avatarImg = new Image();
+        if (avatarDataUrl) {
+            avatarImg.src = avatarDataUrl;
+        } else {
+            // Default Abstract Cyber Avatar generated dynamically if none provided
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = 200; tempCanvas.height = 200;
+            const tCtx = tempCanvas.getContext('2d');
+            const g = tCtx.createLinearGradient(0,0,200,200);
+            g.addColorStop(0, '#6C63FF'); g.addColorStop(1, '#00D9FF');
+            tCtx.fillStyle = g; tCtx.fillRect(0,0,200,200);
+            tCtx.fillStyle = '#fff'; tCtx.font = 'bold 80px Inter'; tCtx.textAlign = 'center'; tCtx.textBaseline = 'middle';
+            tCtx.fillText(username.charAt(0).toUpperCase(), 100, 100);
+            avatarImg.src = tempCanvas.toDataURL();
+        }
+
+        await new Promise((resolve) => { avatarImg.onload = resolve; });
+
+        const avatarSize = 100;
+        const avatarX = bubbleX + padding;
+        const avatarY = bubbleY + padding;
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(avatarX + avatarSize/2, avatarY + avatarSize/2, avatarSize/2, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.clip();
+        ctx.drawImage(avatarImg, avatarX, avatarY, avatarSize, avatarSize);
+        ctx.restore();
+
+        // Avatar Outer Glow Ring
+        ctx.beginPath();
+        ctx.arc(avatarX + avatarSize/2, avatarY + avatarSize/2, (avatarSize/2) + 4, 0, Math.PI * 2);
+        ctx.strokeStyle = '#00D9FF';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        // 5. Draw Username
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = 'bold 45px "Space Grotesk", sans-serif';
+        ctx.fillText(username, avatarX + avatarSize + 30, avatarY + 45);
+
+        // Draw "Premium User" badge
+        ctx.fillStyle = '#00D9FF';
+        ctx.font = '600 24px "Inter", sans-serif';
+        ctx.fillText("VERIFIED • ENCRYPTED", avatarX + avatarSize + 30, avatarY + 85);
+
+        // 6. Draw Text Bubble Content
+        ctx.fillStyle = '#E2E8F0';
+        ctx.font = '400 42px "Inter", sans-serif';
+        wrapText(ctx, text, bubbleX + padding, avatarY + avatarSize + 60, maxWidth, lineHeight);
+
+        // 7. XAERISOFT Watermark
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+        ctx.font = '700 28px "Space Grotesk", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText("XAERISOFT STUDIO", canvas.width / 2, canvas.height - 40);
+
+        // Export to DOM
+        currentOutputUrl = canvas.toDataURL('image/png');
+        DOM.canvas.src = currentOutputUrl;
+        
+        // Use Image tag instead of actual canvas for better responsiveness
+        const finalImg = new Image();
+        finalImg.src = currentOutputUrl;
+        finalImg.style.width = '100%';
+        finalImg.style.display = 'block';
+        
+        const wrapper = DOM.canvas.parentNode;
+        wrapper.innerHTML = ''; 
+        wrapper.appendChild(finalImg);
+
+        DOM.loading.classList.remove('active');
+        DOM.resultSection.classList.add('show');
+        showToast();
+        
+        setTimeout(() => {
+            DOM.resultSection.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }, 100);
+
+    } catch (err) {
+        DOM.loading.classList.remove('active');
+        showError('Kesalahan Render: ' + err.message);
+        console.error(err);
+    }
+}
+
+// Events
+DOM.generateBtn.addEventListener('click', renderCanvas);
+
+DOM.downloadBtn.addEventListener('click', () => {
+    if (!currentOutputUrl) return;
+    const a = document.createElement('a');
+    a.href = currentOutputUrl;
+    a.download = `XAERISOFT_Render_${Date.now()}.png`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+});
+
+DOM.newBtn.addEventListener('click', () => {
+    DOM.resultSection.classList.remove('show');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 });
