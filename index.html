@@ -3,131 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IQC STUDIO - Mobile Build</title>
+    <title>TikTok Downloader</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="gradient-bg">
-        <div class="gradient-pink"></div>
-        <div class="gradient-blue"></div>
-    </div>
-    
-    <div class="container-wrapper">
-        <div class="mobile-container">
-            <div class="mobile-header">
-                <div class="header-left">
-                    <div class="studio-title">IQC STUDIO</div>
-                    <div class="build-version">MOBILE BUILD v3.0</div>
-                    <div class="divider-line"></div>
+    <!-- Landing Page -->
+    <section class="landing-page" id="landingPage">
+        <div class="animated-bg"></div>
+        <div class="container">
+            <div class="welcome-card">
+                <div class="logo-container animate-zoomIn">
+                    <i class="fab fa-tiktok"></i>
                 </div>
-                
-                <div class="ready-badge">
-                    <div class="ready-dot"></div>
-                    <div class="ready-text">READY</div>
+                <div class="welcome-text">
+                    <h1>TikTok Downloader</h1>
+                    <p>Selamat datang di TikTok Downloader</p>
                 </div>
+                <button class="continue-btn" id="continueBtn">
+                    <span>Lanjutkan</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
             </div>
-            
-            <div class="input-section">
-                <!-- Baris 1: Input Pesan (full width) -->
-                <div class="input-group">
-                    <div class="input-label">
-                        PESAN CHAT
-                    </div>
-                    <input type="text" id="text" class="message-input" placeholder="Ketik pesan disini...">
-                </div>
-                
-                <!-- Baris 2: Select Style -->
-                <div class="input-group">
-                    <div class="input-label">
-                        STYLE
-                    </div>
-                    <div class="custom-select-wrapper">
-                        <select class="custom-select" id="styleSelect">
-                            <option value="style1">Style 1</option>
-                            <option value="style2">Style 2</option>
-                        </select>
-                    </div>
-                </div>
+        </div>
+    </section>
 
-                <!-- Baris 3: Select Background -->
-                <div class="input-group" id="bgGroup" style="display:none;">
-                    <div class="input-label">
-                        BACKGROUND
+    <!-- Download Page -->
+    <section class="download-page" id="downloadPage">
+        <div class="container">
+            <div class="main-card">
+                <div class="card-header">
+                    <div class="logo-section">
+                        <div class="logo-small">
+                            <i class="fab fa-tiktok"></i>
+                        </div>
+                        <div class="logo-text">
+                            <h2>TikTok Downloader</h2>
+                            <p>Download video & foto TikTok</p>
+                        </div>
                     </div>
-                    <div class="custom-select-wrapper">
-                        <select class="custom-select" id="bgSelect">
-                            <option value="pink">Pink</option>
-                            <option value="light">Light</option>
-                            <option value="dark">Dark</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Baris 4: Input Waktu (full width) -->
-                <div class="input-group">
-                    <div class="input-label">
-                        WAKTU
-                    </div>
-                    <input type="text" id="time" class="message-input" placeholder="22.54">
-                </div>
-            </div>
-            
-            <div class="error-message" id="errorMessage">
-                <i class="fas fa-exclamation-circle"></i>
-                <span id="errorText">Terjadi kesalahan. Periksa input Anda dan coba lagi.</span>
-            </div>
-            
-            <button class="generate-btn" id="generateBtn">
-                <i class="fas fa-bolt"></i>
-                GENERATE IMAGE
-            </button>
-            
-            <div class="result-section" id="resultSection">
-                <div class="image-container">
-                    <img id="generatedImage" class="generated-image" src="" alt="Generated Image">
                 </div>
                 
-                <div class="action-buttons">
-                    <button class="action-btn download-btn" id="downloadBtn">
-                        <i class="fas fa-download"></i>
+                <div class="version-badge">v1.0</div>
+                
+                <div class="input-section">
+                    <div class="url-input-container">
+                        <input type="text" class="url-input" id="urlInput" placeholder="Tempel URL TikTok di sini...">
+                        <button class="paste-btn" id="pasteBtn" title="Tempel dari clipboard">
+                            <i class="fas fa-paste"></i>
+                        </button>
+                    </div>
+                    <button class="download-btn" id="downloadBtn">
                         Download
                     </button>
-                    <button class="action-btn new-btn" id="newBtn">
-                        <i class="fas fa-redo"></i>
-                        Buat Baru
-                    </button>
+                </div>
+                
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Memproses...</p>
+                </div>
+                
+                <div class="error-message" id="errorMessage">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <p id="errorText">URL tidak valid. Silakan coba lagi.</p>
+                </div>
+                
+                <!-- Video Result -->
+                <div class="result-section" id="videoResult">
+                    <div class="video-result">
+                        <div class="thumbnail-container">
+                            <img id="videoThumbnail" class="thumbnail" src="" alt="Video Thumbnail">
+                        </div>
+                        <div class="video-info">
+                            <div class="video-details">
+                                <h3 id="videoTitle">Judul Video</h3>
+                                <div class="info-item">
+                                    <i class="fas fa-user"></i>
+                                    <span id="videoAuthor">Pembuat Konten</span>
+                                </div>
+                                <div class="info-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span id="videoDuration">0:00</span>
+                                </div>
+                                <div class="info-item">
+                                    <i class="fas fa-eye"></i>
+                                    <span id="videoViews">0 views</span>
+                                </div>
+                                <div class="info-item">
+                                    <i class="fas fa-heart"></i>
+                                    <span id="videoLikes">0 likes</span>
+                                </div>
+                            </div>
+                            <div class="video-description" id="videoDescription">
+                                Deskripsi video akan muncul di sini
+                            </div>
+                            <div class="download-options">
+                                <button class="option-btn" id="downloadVideoBtn">
+                                    Download Video
+                                </button>
+                                <button class="option-btn" id="downloadMusicBtn">
+                                    Download Musik
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Photo Result - VERTIKAL (TANPA DATA KREATOR) -->
+                <div class="result-section" id="photoResult">
+                    <div class="photo-list" id="photoList">
+                        <!-- Foto akan ditampilkan di sini secara vertikal -->
+                    </div>
+                    <div class="download-options" style="margin-top: 20px;">
+                        <button class="option-btn" id="downloadPhotoBtn">
+                            Download Semua Foto
+                        </button>
+                    </div>
                 </div>
             </div>
             
-            <div class="mobile-footer">
-                <a href="https://whatsapp.com/channel/0029VbD5XgjEVccHF8XVcr3q" target="_blank" class="whatsapp-btn">
-                    <i class="fab fa-whatsapp"></i>
-                     JOIN WA CHANNEL 
-                </a>
-                
-                <div class="developer-credit">
-                    DEV BY <span class="dev-name">LUTFIZX</span>
-                </div>
+            <div class="footer">
+                <p>©2026 Wilxd. All right reserved</p>
             </div>
         </div>
-    </div>
-    
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="spinner"></div>
-        <p class="loading-text">Generating Image...</p>
-    </div>
-    
-    <div class="notification" id="notification">
-        <div class="notification-icon">
-            <i class="fas fa-check-circle"></i>
-        </div>
-        <div class="notification-content">
-            <h3>Generate Selesai!</h3>
-            <p>Gambar berhasil dibuat dan siap diunduh</p>
-        </div>
-    </div>
-    
+    </section>
+
     <script src="script.js"></script>
 </body>
 </html>
