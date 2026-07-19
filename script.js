@@ -1,8 +1,46 @@
 /**
- * XAERISOFT CHAT STUDIO ENGINE v2.0
- * Completely Original Canvas Renderer
- * No external template images. 100% Programmatic Canvas drawing.
+ * XAERISOFT CHAT STUDIO ENGINE v2.1
+ * UI/UX: Futuristik & Premium
+ * Canvas Render: Original TikTok Template Restored
  */
+
+// =============================================
+// ORIGINAL CONFIG & ASSETS 
+// =============================================
+const TEMPLATE_URL = 'https://cdn.jsdelivr.net/gh/Ditzzx-vibecoder/Assets@main/ttqc/qyzwa.png';
+
+const FONT_ASSETS = [
+  { name: 'PlusJakartaSans-Regular', url: 'https://cdn.jsdelivr.net/gh/Ditzzx-vibecoder/Assets@main/ttqc/PlusJakartaSans-Regular.ttf', family: 'Plus Jakarta Sans' },
+  { name: 'PlusJakartaSans-Medium',  url: 'https://cdn.jsdelivr.net/gh/Ditzzx-vibecoder/Assets@main/ttqc/PlusJakartaSans-Medium.ttf',  family: 'Plus Jakarta Sans' },
+  { name: 'PlusJakartaSans-Bold',    url: 'https://cdn.jsdelivr.net/gh/Ditzzx-vibecoder/Assets@main/ttqc/PlusJakartaSans-Bold.ttf',    family: 'Plus Jakarta Sans' },
+  { name: 'FontAwesome-Solid',       url: 'https://cdn.jsdelivr.net/gh/Ditzzx-vibecoder/Assets@main/ttqc/fa-solid-900.ttf',            family: 'Font Awesome 6 Free' },
+];
+
+const MENU_ICONS = [
+  { unicode: '\uf3e5', text: 'Balas',           color: '#000000' },
+  { unicode: '\uf064', text: 'Teruskan',         color: '#000000' },
+  { unicode: '\uf0c5', text: 'Salin',            color: '#000000' },
+  { unicode: '\uf1ab', text: 'Terjemahkan',      color: '#000000' },
+  { unicode: '\uf2ed', text: 'Hapus untuk saya', color: '#000000' },
+  { unicode: '\uf024', text: 'Laporkan',         color: '#ea4335' },
+];
+
+const config = {
+  topPPX: 183, topPPY: 83, topPPRadius: 42,
+  topNameX: 250, topNameY: 82, topNameSize: 34,
+  chatPPX: 75, chatPPRadius: 38,
+  textX: 175, textY: 962,
+  bubbleWidth: 520, textSize: 30,
+  bubbleBgColor: '#ffffff', textColor: '#161823',
+};
+
+// =============================================
+// CACHE & DOM ELEMENTS
+// =============================================
+let templateImageCache = null;
+let fontsLoaded = false;
+let currentDataUrl = '';
+let avatarDataUrl = null;
 
 const DOM = {
     dropZone: document.getElementById('dropZone'),
@@ -18,13 +56,13 @@ const DOM = {
     errorMsg: document.getElementById('errorMessage'),
     errorText: document.getElementById('errorText'),
     loading: document.getElementById('loadingOverlay'),
+    loadingSub: document.getElementById('loadingSub'),
     toast: document.getElementById('notification')
 };
 
-let avatarDataUrl = null;
-let currentOutputUrl = null;
-
-// Modern File Upload Handling
+// =============================================
+// DROP ZONE LOGIC (MODERNIZED)
+// =============================================
 DOM.dropZone.addEventListener('click', () => DOM.avatarFile.click());
 DOM.dropZone.addEventListener('dragover', (e) => {
     e.preventDefault();
@@ -34,232 +72,213 @@ DOM.dropZone.addEventListener('dragleave', () => DOM.dropZone.classList.remove('
 DOM.dropZone.addEventListener('drop', (e) => {
     e.preventDefault();
     DOM.dropZone.classList.remove('active');
-    handleFile(e.dataTransfer.files[0]);
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) loadAvatarFile(file);
 });
-DOM.avatarFile.addEventListener('change', (e) => handleFile(e.target.files[0]));
+DOM.avatarFile.addEventListener('change', (e) => {
+    if (e.target.files[0]) loadAvatarFile(e.target.files[0]);
+});
 
-function handleFile(file) {
-    if (!file || !file.type.startsWith('image/')) {
-        showError('Format file ditolak. Gunakan format gambar.');
-        return;
-    }
+function loadAvatarFile(file) {
     const reader = new FileReader();
-    reader.onload = (e) => {
-        avatarDataUrl = e.target.result;
+    reader.onload = (ev) => {
+        avatarDataUrl = ev.target.result;
         DOM.avatarThumb.src = avatarDataUrl;
         DOM.avatarThumb.classList.add('show');
     };
     reader.readAsDataURL(file);
 }
 
-function showError(msg) {
-    DOM.errorText.textContent = msg;
-    DOM.errorMsg.classList.add('show');
-    setTimeout(() => DOM.errorMsg.classList.remove('show'), 4000);
-}
-
-function showToast() {
-    DOM.toast.classList.add('show');
-    setTimeout(() => DOM.toast.classList.remove('show'), 4000);
-}
-
-// -----------------------------------------------------------------
-// ENGINE CANVAS: GLASSMORPHISM RENDERER (100% ORIGINAL)
-// -----------------------------------------------------------------
-function drawRoundedRect(ctx, x, y, width, height, radius) {
-    ctx.beginPath();
-    ctx.moveTo(x + radius, y);
-    ctx.lineTo(x + width - radius, y);
-    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-    ctx.lineTo(x + width, y + height - radius);
-    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-    ctx.lineTo(x + radius, y + height);
-    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-    ctx.lineTo(x, y + radius);
-    ctx.quadraticCurveTo(x, y, x + radius, y);
-    ctx.closePath();
-}
-
-function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
-    const words = text.split(' ');
-    let line = '';
-    let currentY = y;
-    
-    for(let n = 0; n < words.length; n++) {
-        const testLine = line + words[n] + ' ';
-        const metrics = ctx.measureText(testLine);
-        const testWidth = metrics.width;
-        
-        if (testWidth > maxWidth && n > 0) {
-            ctx.fillText(line, x, currentY);
-            line = words[n] + ' ';
-            currentY += lineHeight;
+// =============================================
+// ORIGINAL HELPERS RESTORED
+// =============================================
+function wrapText(ctx, text, maxWidth) {
+    const words = text.split(/(\s+)/);
+    const lines = [];
+    let currentLine = '';
+    for (const word of words) {
+        if (!word) continue;
+        if (word.trim() === '' && currentLine === '') continue;
+        const testLine = currentLine + word;
+        if (ctx.measureText(testLine).width > maxWidth) {
+            if (currentLine !== '') {
+                lines.push(currentLine.trimEnd());
+                currentLine = word.trimStart();
+            } else {
+                lines.push(testLine);
+                currentLine = '';
+            }
         } else {
-            line = testLine;
+            currentLine = testLine;
         }
     }
-    ctx.fillText(line, x, currentY);
-    return currentY + lineHeight;
+    if (currentLine.trim()) lines.push(currentLine.trimEnd());
+    return lines;
 }
 
-async function renderCanvas() {
-    const username = DOM.username.value.trim() || 'Anonymous';
-    const text = DOM.chatText.value.trim();
+function drawRoundedRect(ctx, x, y, w, h, r, fill, stroke = null, shadow = false) {
+    ctx.save();
+    if (shadow) {
+        ctx.shadowColor = 'rgba(0,0,0,0.05)';
+        ctx.shadowBlur = 40;
+        ctx.shadowOffsetY = 12;
+    }
+    ctx.fillStyle = fill;
+    ctx.beginPath();
+    ctx.moveTo(x+r, y); ctx.lineTo(x+w-r, y); ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+    ctx.lineTo(x+w, y+h-r); ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+    ctx.lineTo(x+r, y+h); ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+    ctx.lineTo(x, y+r); ctx.quadraticCurveTo(x, y, x+r, y);
+    ctx.closePath();
+    ctx.fill();
+    if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = 1; ctx.stroke(); }
+    ctx.restore();
+}
 
-    if (!text) return showError('Transmisi pesan tidak boleh kosong.');
+function drawCircleImage(ctx, img, cx, cy, r) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.closePath();
+    ctx.clip();
+    ctx.drawImage(img, cx-r, cy-r, r*2, r*2);
+    ctx.restore();
+}
+
+function loadImg(src) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = src;
+    });
+}
+
+async function loadFonts() {
+    if (fontsLoaded) return;
+    for (const f of FONT_ASSETS) {
+        if(DOM.loadingSub) DOM.loadingSub.textContent = `Memuat font ${f.name}...`;
+        const font = new FontFace(f.family, `url(${f.url})`);
+        const loaded = await font.load();
+        document.fonts.add(loaded);
+    }
+    fontsLoaded = true;
+}
+
+// =============================================
+// MAIN RENDER ENGINE
+// =============================================
+async function generate() {
+    const username = DOM.username.value.trim() || 'Lutzz';
+    const chatText = DOM.chatText.value.trim() || 'Just friend kok cemburu 😂😂';
+
+    if (!chatText) { showError('Pesan chat tidak boleh kosong.'); return; }
 
     DOM.loading.classList.add('active');
     DOM.errorMsg.classList.remove('show');
-
-    // Beri waktu browser untuk memunculkan loading screen
-    await new Promise(r => setTimeout(r, 100));
+    await new Promise(r => setTimeout(r, 50)); // Render tick
 
     try {
+        await loadFonts();
+
+        if (!templateImageCache) {
+            if(DOM.loadingSub) DOM.loadingSub.textContent = 'Memuat template...';
+            templateImageCache = await loadImg(TEMPLATE_URL);
+        }
+
+        if(DOM.loadingSub) DOM.loadingSub.textContent = 'Memuat avatar...';
+        let avatarImage;
+        if (avatarDataUrl) {
+            avatarImage = await loadImg(avatarDataUrl);
+        } else {
+            avatarImage = await loadImg('https://cdn.jsdelivr.net/gh/Ditzzx-vibecoder/Assets@6b71d84a580f385bd7ee36402df5341ead4770a0/Image/artworks-gWLRE6HyPH3DgVMG-ZFFxtg-t500x500.jpg');
+        }
+
+        if(DOM.loadingSub) DOM.loadingSub.textContent = 'Rendering...';
+
+        // Original Canvas dimensions & scaling
         const canvas = document.createElement('canvas');
-        // Resolusi Tinggi untuk hasil Premium (1080x1080 Square Post)
-        canvas.width = 1080;
-        canvas.height = 1080;
+        canvas.width  = 1080 * 2;
+        canvas.height = 2280 * 2;
         const ctx = canvas.getContext('2d');
 
-        // 1. Draw Universe Background #050816 to #121A45
-        const bgGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-        bgGradient.addColorStop(0, '#050816');
-        bgGradient.addColorStop(1, '#121A45');
-        ctx.fillStyle = bgGradient;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.scale(2, 2);
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
 
-        // 2. Draw Premium Glowing Nebula
-        const glow1 = ctx.createRadialGradient(200, 200, 0, 200, 200, 600);
-        glow1.addColorStop(0, 'rgba(108, 99, 255, 0.4)');
-        glow1.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.fillStyle = glow1;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // 1. Draw Original Template
+        ctx.clearRect(0, 0, 1080, 2280);
+        ctx.drawImage(templateImageCache, 0, 0, 1080, 2280);
 
-        const glow2 = ctx.createRadialGradient(800, 800, 0, 800, 800, 700);
-        glow2.addColorStop(0, 'rgba(0, 217, 255, 0.25)');
-        glow2.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.fillStyle = glow2;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // 2. Top profile picture
+        drawCircleImage(ctx, avatarImage, config.topPPX, config.topPPY, config.topPPRadius);
 
-        // Draw grid lines for Cyber feel
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
-        ctx.lineWidth = 2;
-        for(let i=0; i<canvas.width; i+=80) {
-            ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(canvas.width, i); ctx.stroke();
+        // 3. Username di header
+        ctx.font = `bold ${config.topNameSize}px 'Plus Jakarta Sans', sans-serif`;
+        ctx.fillStyle = '#000000';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(username, config.topNameX, config.topNameY);
+
+        // 4. Chat text wrap & calculations
+        ctx.font = `500 ${config.textSize}px 'Plus Jakarta Sans', sans-serif`;
+        const lines = wrapText(ctx, chatText, config.bubbleWidth - 52);
+        const lineH = config.textSize * 1.45;
+
+        let maxW = 0;
+        for (const l of lines) {
+            const w = ctx.measureText(l).width;
+            if (w > maxW) maxW = w;
         }
 
-        // 3. Draw Glassmorphism Chat Bubble
-        ctx.font = '500 42px "Inter", sans-serif';
-        const maxWidth = 750;
-        const lineHeight = 65;
+        const padX = 30, padY = 24;
+        const bubbleW = Math.max(maxW + padX*2, 180);
+        const bubbleH = lines.length * lineH + padY*2;
+        const bubbleX = config.textX - padX;
+        const bubbleY = config.textY - padY;
+
+        // 5. Chat avatar
+        drawCircleImage(ctx, avatarImage, config.chatPPX, bubbleY + bubbleH/2, config.chatPPRadius);
+
+        // 6. Bubble
+        drawRoundedRect(ctx, bubbleX, bubbleY, bubbleW, bubbleH, 35, config.bubbleBgColor);
+
+        // 7. Chat text
+        ctx.fillStyle = config.textColor;
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        lines.forEach((line, i) => {
+            const lineY = config.textY + i * lineH + config.textSize / 2;
+            ctx.fillText(line, config.textX, lineY);
+        });
+
+        // 8. Menu popup (Original Restored)
+        const menuX = 90, menuY = bubbleY + bubbleH + 28;
+        drawRoundedRect(ctx, menuX, menuY, 565, 580, 40, '#ffffff', 'rgba(0,0,0,0.02)', true);
+
+        const itemH = 90, iconX = menuX + 60, labelX = menuX + 130;
+        MENU_ICONS.forEach((item, i) => {
+            const cy = menuY + 25 + i * itemH + itemH/2;
+            ctx.fillStyle = item.color;
+            ctx.font = `900 34px 'Font Awesome 6 Free'`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(item.unicode, iconX, cy);
+            ctx.font = `500 34px 'Plus Jakarta Sans', sans-serif`;
+            ctx.textAlign = 'left';
+            ctx.fillText(item.text, labelX, cy);
+        });
+
+        // Copy to display canvas (Responsive fix applied)
+        currentDataUrl = canvas.toDataURL('image/png');
+        DOM.canvas.src = currentDataUrl;
         
-        // Calculate bubble height dynamically based on text
-        const words = text.split(' ');
-        let testLine = '';
-        let lineCount = 1;
-        for(let n = 0; n < words.length; n++) {
-            const temp = testLine + words[n] + ' ';
-            if(ctx.measureText(temp).width > maxWidth && n > 0) {
-                lineCount++; testLine = words[n] + ' ';
-            } else { testLine = temp; }
-        }
-
-        const padding = 50;
-        const bubbleW = 850;
-        const bubbleH = (lineCount * lineHeight) + (padding * 2) + 120; // 120 for header space
-        const bubbleX = (canvas.width - bubbleW) / 2;
-        const bubbleY = (canvas.height - bubbleH) / 2;
-
-        ctx.save();
-        // Shadow for floating effect
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
-        ctx.shadowBlur = 40;
-        ctx.shadowOffsetY = 20;
-
-        // Glass Fill
-        ctx.fillStyle = 'rgba(10, 16, 38, 0.6)'; // Translucent dark
-        drawRoundedRect(ctx, bubbleX, bubbleY, bubbleW, bubbleH, 30);
-        ctx.fill();
-        ctx.restore();
-
-        // Border Glow
-        ctx.lineWidth = 3;
-        const borderGrad = ctx.createLinearGradient(bubbleX, bubbleY, bubbleX+bubbleW, bubbleY+bubbleH);
-        borderGrad.addColorStop(0, 'rgba(0, 217, 255, 0.6)');
-        borderGrad.addColorStop(1, 'rgba(108, 99, 255, 0.3)');
-        ctx.strokeStyle = borderGrad;
-        drawRoundedRect(ctx, bubbleX, bubbleY, bubbleW, bubbleH, 30);
-        ctx.stroke();
-
-        // 4. Load & Draw Avatar
-        let avatarImg = new Image();
-        if (avatarDataUrl) {
-            avatarImg.src = avatarDataUrl;
-        } else {
-            // Default Abstract Cyber Avatar generated dynamically if none provided
-            const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = 200; tempCanvas.height = 200;
-            const tCtx = tempCanvas.getContext('2d');
-            const g = tCtx.createLinearGradient(0,0,200,200);
-            g.addColorStop(0, '#6C63FF'); g.addColorStop(1, '#00D9FF');
-            tCtx.fillStyle = g; tCtx.fillRect(0,0,200,200);
-            tCtx.fillStyle = '#fff'; tCtx.font = 'bold 80px Inter'; tCtx.textAlign = 'center'; tCtx.textBaseline = 'middle';
-            tCtx.fillText(username.charAt(0).toUpperCase(), 100, 100);
-            avatarImg.src = tempCanvas.toDataURL();
-        }
-
-        await new Promise((resolve) => { avatarImg.onload = resolve; });
-
-        const avatarSize = 100;
-        const avatarX = bubbleX + padding;
-        const avatarY = bubbleY + padding;
-
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(avatarX + avatarSize/2, avatarY + avatarSize/2, avatarSize/2, 0, Math.PI * 2);
-        ctx.closePath();
-        ctx.clip();
-        ctx.drawImage(avatarImg, avatarX, avatarY, avatarSize, avatarSize);
-        ctx.restore();
-
-        // Avatar Outer Glow Ring
-        ctx.beginPath();
-        ctx.arc(avatarX + avatarSize/2, avatarY + avatarSize/2, (avatarSize/2) + 4, 0, Math.PI * 2);
-        ctx.strokeStyle = '#00D9FF';
-        ctx.lineWidth = 3;
-        ctx.stroke();
-
-        // 5. Draw Username
-        ctx.fillStyle = '#FFFFFF';
-        ctx.font = 'bold 45px "Space Grotesk", sans-serif';
-        ctx.fillText(username, avatarX + avatarSize + 30, avatarY + 45);
-
-        // Draw "Premium User" badge
-        ctx.fillStyle = '#00D9FF';
-        ctx.font = '600 24px "Inter", sans-serif';
-        ctx.fillText("VERIFIED • ENCRYPTED", avatarX + avatarSize + 30, avatarY + 85);
-
-        // 6. Draw Text Bubble Content
-        ctx.fillStyle = '#E2E8F0';
-        ctx.font = '400 42px "Inter", sans-serif';
-        wrapText(ctx, text, bubbleX + padding, avatarY + avatarSize + 60, maxWidth, lineHeight);
-
-        // 7. XAERISOFT Watermark
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
-        ctx.font = '700 28px "Space Grotesk", sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText("XAERISOFT STUDIO", canvas.width / 2, canvas.height - 40);
-
-        // Export to DOM
-        currentOutputUrl = canvas.toDataURL('image/png');
-        DOM.canvas.src = currentOutputUrl;
-        
-        // Use Image tag instead of actual canvas for better responsiveness
         const finalImg = new Image();
-        finalImg.src = currentOutputUrl;
+        finalImg.src = currentDataUrl;
         finalImg.style.width = '100%';
         finalImg.style.display = 'block';
+        finalImg.style.borderRadius = '12px';
         
         const wrapper = DOM.canvas.parentNode;
         wrapper.innerHTML = ''; 
@@ -270,30 +289,48 @@ async function renderCanvas() {
         showToast();
         
         setTimeout(() => {
-            DOM.resultSection.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            DOM.resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 100);
 
-    } catch (err) {
+    } catch(err) {
         DOM.loading.classList.remove('active');
-        showError('Kesalahan Render: ' + err.message);
+        showError('Gagal generate: ' + err.message);
         console.error(err);
     }
 }
 
-// Events
-DOM.generateBtn.addEventListener('click', renderCanvas);
+// =============================================
+// UI ALERTS & LISTENERS
+// =============================================
+function showToast() {
+    DOM.toast.classList.add('show');
+    setTimeout(() => DOM.toast.classList.remove('show'), 4000);
+}
+
+function showError(msg) {
+    DOM.errorText.textContent = msg;
+    DOM.errorMsg.classList.add('show');
+    setTimeout(() => DOM.errorMsg.classList.remove('show'), 5000);
+}
+
+DOM.generateBtn.addEventListener('click', generate);
 
 DOM.downloadBtn.addEventListener('click', () => {
-    if (!currentOutputUrl) return;
+    if (!currentDataUrl) { showError('Tidak ada gambar'); return; }
     const a = document.createElement('a');
-    a.href = currentOutputUrl;
-    a.download = `XAERISOFT_Render_${Date.now()}.png`;
-    document.body.appendChild(a);
-    a.click();
+    a.href = currentDataUrl;
+    a.download = `XAERISOFT-${Date.now()}.png`;
+    document.body.appendChild(a); 
+    a.click(); 
     document.body.removeChild(a);
 });
 
 DOM.newBtn.addEventListener('click', () => {
     DOM.resultSection.classList.remove('show');
     window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey && document.activeElement !== DOM.chatText
+        && !DOM.loading.classList.contains('active')) DOM.generateBtn.click();
 });
