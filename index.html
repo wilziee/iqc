@@ -90,31 +90,20 @@
                     <h1 class="brand-name">XAERISOFT <span>STUDIO</span></h1>
                 </div>
                 <div class="status-badge">
-                    <span class="status-dot"></span> v2.0
+                    <span class="status-dot"></span> v2.2
                 </div>
             </header>
 
-            <!-- TABS MENU (IQC Dihapus secara elegan) -->
+            <!-- TABS MENU -->
             <div class="cyber-tabs" id="toolTabs">
                 <button class="tab-btn active" onclick="switchTab('wmp1', this)">WMP 1</button>
                 <button class="tab-btn" onclick="switchTab('wmp2', this)">WMP 2</button>
                 <button class="tab-btn" onclick="switchTab('fakeff', this)">Fake FF</button>
-                <button class="tab-btn" onclick="switchTab('fakeffduo', this)">FF Duo</button>
                 <button class="tab-btn" onclick="switchTab('nokia', this)">Nokia</button>
                 <button class="tab-btn" onclick="switchTab('ttqc', this)">TTQC</button>
                 <button class="tab-btn" onclick="switchTab('iqcimg', this)">IQC Img</button>
                 <button class="tab-btn" onclick="switchTab('iqcdark', this)">IQC Dark</button>
                 <button class="tab-btn" onclick="switchTab('musiccard', this)">Music Card</button>
-                <button class="tab-btn" onclick="switchTab('botak', this)">Botak</button>
-                <button class="tab-btn" onclick="switchTab('chibi', this)">Chibi</button>
-                <button class="tab-btn" onclick="switchTab('figure', this)">Figure</button>
-                <button class="tab-btn" onclick="switchTab('nft', this)">NFT</button>
-                <button class="tab-btn" onclick="switchTab('mafia', this)">Mafia</button>
-                <button class="tab-btn" onclick="switchTab('hitam', this)">Hitam</button>
-                <button class="tab-btn" onclick="switchTab('mountain', this)">Mountain</button>
-                <button class="tab-btn" onclick="switchTab('mirror', this)">Mirror</button>
-                <button class="tab-btn" onclick="switchTab('playlist', this)">Playlist</button>
-                <button class="tab-btn" onclick="switchTab('figure2', this)">Figure 2</button>
             </div>
 
             <!-- PANEL: WMP 1 -->
@@ -152,7 +141,7 @@
                 <div class="input-grid">
                     <div class="input-wrapper">
                         <label><i class="fas fa-gamepad"></i> Username</label>
-                        <input type="text" id="fakeff-usn" class="neon-input" placeholder="NexaDev𝜗ৎ" value="NexaDev𝜗ৎ">
+                        <input type="text" id="fakeff-usn" class="neon-input" placeholder="" value="">
                     </div>
                     <button class="btn-generate" onclick="generate('fakeff')">
                         <span class="btn-text">GENERATE FAKE FF</span> <i class="fas fa-bolt"></i>
@@ -160,27 +149,6 @@
                 </div>
                 <div class="result-box" id="result-fakeff"></div>
                 <div class="cyber-alert" id="err-fakeff"></div>
-            </div>
-
-            <!-- PANEL: FAKE FF DUO -->
-            <div id="panel-fakeffduo" class="panel">
-                <div class="input-grid">
-                    <div class="form-row">
-                        <div class="input-wrapper">
-                            <label><i class="fas fa-user-ninja"></i> Nama Player 1</label>
-                            <input type="text" id="ffduo-name1" class="neon-input" placeholder="nexa" value="nexa">
-                        </div>
-                        <div class="input-wrapper">
-                            <label><i class="fas fa-user-ninja"></i> Nama Player 2</label>
-                            <input type="text" id="ffduo-name2" class="neon-input" placeholder="Nexadev" value="Nexadev">
-                        </div>
-                    </div>
-                    <button class="btn-generate" onclick="generate('fakeffduo')">
-                        <span class="btn-text">GENERATE FF DUO</span> <i class="fas fa-bolt"></i>
-                    </button>
-                </div>
-                <div class="result-box" id="result-fakeffduo"></div>
-                <div class="cyber-alert" id="err-fakeffduo"></div>
             </div>
 
             <!-- PANEL: NOKIA -->
@@ -193,11 +161,11 @@
                     <div class="form-row">
                         <div class="input-wrapper">
                             <label><i class="fas fa-user"></i> Pengirim</label>
-                            <input type="text" id="nokia-from" class="neon-input" placeholder="nexa" value="nexa">
+                            <input type="text" id="nokia-from" class="neon-input" placeholder="" value="">
                         </div>
                         <div class="input-wrapper">
                             <label><i class="fas fa-heading"></i> Title</label>
-                            <input type="text" id="nokia-title" class="neon-input" placeholder="nexa" value="nexa">
+                            <input type="text" id="nokia-title" class="neon-input" placeholder="" value="">
                         </div>
                     </div>
                     <div class="form-row">
@@ -302,7 +270,8 @@
                 <div class="result-box" id="result-iqcdark"></div>
                 <div class="cyber-alert" id="err-iqcdark"></div>
             </div>
-  <!-- PANEL: MUSIC CARD -->
+            
+            <!-- PANEL: MUSIC CARD -->
             <div id="panel-musiccard" class="panel">
                 <div class="input-grid">
                     <div class="form-row">
@@ -336,51 +305,13 @@
                 <div class="cyber-alert" id="err-musiccard"></div>
             </div>
 
-            <!-- ==============================================
-                 FILE UPLOAD TOOLS (Botak s/d Figure2)
-                 Script Template Elegan
-            =============================================== -->
-            
-            <script>
-                // Script ini cuma buat render HTML upload lebih gampang dibaca.
-                const uploadTools = ['botak', 'chibi', 'figure', 'nft', 'mafia', 'hitam', 'mountain', 'mirror', 'playlist', 'figure2'];
-                
-                uploadTools.forEach(tool => {
-                    const title = tool.toUpperCase();
-                    document.write(`
-                    <div id="panel-${tool}" class="panel">
-                        <div class="input-grid">
-                            <div class="input-wrapper">
-                                <label><i class="fas fa-file-upload"></i> Upload Foto (To ${title})</label>
-                                <div class="drop-zone" id="drop-${tool}" onclick="document.getElementById('file-${tool}').click()" ondragover="onDragOver(event,'${tool}')" ondragleave="onDragLeave(event,'${tool}')" ondrop="onDrop(event,'${tool}')">
-                                    <input type="file" id="file-${tool}" accept="image/*" hidden onchange="handleFile('${tool}')">
-                                    <div class="dz-content"><i class="fas fa-cloud-upload-alt upload-icon"></i><span class="dz-text">Inisialisasi Gambar</span><span class="dz-subtext">Drop or click</span></div>
-                                </div>
-                                <div class="upload-preview" id="preview-${tool}">
-                                    <img id="preview-img-${tool}" src="" alt="preview">
-                                    <div id="preview-fname-${tool}" style="font-size:0.8rem; color:var(--neon-cyan); font-weight:bold; overflow:hidden; text-overflow:ellipsis;"></div>
-                                    <div id="preview-url-${tool}" style="font-size:0.7rem; color:var(--text-muted); margin-bottom:10px; word-break:break-all;"></div>
-                                    <button class="btn-cyber btn-reset" onclick="removeUpload('${tool}')" style="width: 100%;"><i class="fas fa-trash"></i> Hapus Foto</button>
-                                </div>
-                            </div>
-                            <button class="btn-generate" onclick="generate('${tool}')">
-                                <span class="btn-text">GENERATE ${title}</span> <i class="fas fa-bolt"></i>
-                            </button>
-                        </div>
-                        <div class="result-box" id="result-${tool}"></div>
-                        <div class="cyber-alert" id="err-${tool}"></div>
-                    </div>
-                    `);
-                });
-            </script>
-
             <footer class="cyber-footer">
                 <p>ENGINEERED BY <span>XAERISOFT</span></p>
             </footer>
         </main>
     </div>
 
-    <!-- Cyber Notification / Toast (Digunakan oleh script.js) -->
+    <!-- Cyber Notification / Toast -->
     <div class="toast" id="toast"></div>
 
     <script src="script.js"></script>
